@@ -70,7 +70,7 @@ export default function Login() {
       </div>
 
       {/* Headline — pojok kiri bawah */}
-      <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-28 sm:px-9 sm:pb-32 lg:max-w-xl lg:pb-16">
+      <div className="absolute inset-x-0 bottom-0 z-10 px-6 pb-6 sm:px-9 sm:pb-8 lg:max-w-xl">
         <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
           Selamat Datang di SI-BERAT Provinsi Nusa Tenggara Timur
         </h1>
@@ -83,15 +83,17 @@ export default function Login() {
           alt="Sigap Membangun Negeri"
           className="mt-5 h-10 w-auto opacity-90 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] sm:h-12"
         />
+        <p className="relative z-20 mt-6 text-2xs text-white/40">
+          Dinas PUPR Provinsi NTT &middot; SI-BERAT v1.0
+          {' '}&middot;{' '}
+          <Link
+            to="/info-sewa"
+            className="relative z-20 inline-block py-1 underline decoration-white/30 underline-offset-2 hover:text-white/70"
+          >
+            Info Sewa Alat Berat
+          </Link>
+        </p>
       </div>
-
-      <p className="absolute bottom-5 left-6 z-10 text-2xs text-white/40 sm:left-9">
-        Dinas PUPR Provinsi NTT &middot; SI-BERAT v1.0
-        {' '}&middot;{' '}
-        <Link to="/info-sewa" className="underline decoration-white/30 underline-offset-2 hover:text-white/70">
-          Info Sewa Alat Berat
-        </Link>
-      </p>
 
       {/* Kartu login — mengambang di kanan */}
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 lg:justify-end lg:pr-16 lg:py-0">
