@@ -32,7 +32,7 @@ export default function Login() {
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-amber-500 text-sm font-bold text-amber-400">
             PUPR
           </div>
-          <h1 className="text-lg font-semibold text-white">SIMSEWA Alat Berat</h1>
+          <h1 className="text-lg font-semibold text-white">SI-BERAT</h1>
           <p className="mt-1 text-sm text-white/50">Dinas PUPR &amp; Penataan Ruang Provinsi NTT</p>
         </div>
 

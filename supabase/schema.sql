@@ -1,5 +1,5 @@
 -- ============================================================================
--- SIMSEWA — Sewa Alat Berat, Dinas PUPR & Penataan Ruang Provinsi NTT
+-- SI-BERAT — Sewa Alat Berat, Dinas PUPR & Penataan Ruang Provinsi NTT
 -- Jalankan skrip ini di Supabase Dashboard -> SQL Editor -> New query
 -- ============================================================================
 

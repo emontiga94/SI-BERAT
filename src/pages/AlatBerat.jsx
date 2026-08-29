@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { formatRupiah } from '../lib/format'
 import { useAuth } from '../lib/AuthContext'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const KONDISI_OPTIONS = [
   'Aktif',
@@ -17,6 +18,14 @@ const KONDISI_STYLES = {
   'Tidak Aktif / Rusak Ringan': 'bg-amber-50 text-amber-700 border-amber-200',
   'Tidak Aktif / Rusak Berat': 'bg-red-50 text-red-700 border-red-200',
   'Tidak Ada': 'bg-slate-100 text-slate-600 border-slate-200',
+}
+
+const KONDISI_ROW_TINT = {
+  Aktif: '',
+  'Aktif / Lainnya': '',
+  'Tidak Aktif / Rusak Ringan': 'bg-amber-50/40',
+  'Tidak Aktif / Rusak Berat': 'bg-red-50/50',
+  'Tidak Ada': 'bg-slate-50',
 }
 
 const emptyForm = {
@@ -71,9 +80,14 @@ export default function AlatBerat() {
     setShowForm(true)
   }
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
   async function handleDelete(id) {
-    if (!window.confirm('Hapus data alat ini? Riwayat sewa yang tertaut tidak akan terhapus.')) return
+    setDeleting(true)
     const { error } = await supabase.from('alat_berat').delete().eq('id', id)
+    setDeleting(false)
+    setConfirmDeleteId(null)
     if (error) {
       setErrorMsg(error.message)
       return
@@ -193,7 +207,7 @@ export default function AlatBerat() {
               </tr>
             )}
             {filtered.map((a) => (
-              <tr key={a.id} className="hover:bg-slate-50/60">
+              <tr key={a.id} className={`hover:bg-slate-50/60 ${KONDISI_ROW_TINT[a.kondisi] || ''}`}>
                 <td className="px-4 py-3 font-medium text-navy-950">
                   {a.kode ? <span className="mr-1 text-navy-900/40">{a.kode}.</span> : null}
                   {a.nama_alat}
@@ -219,7 +233,7 @@ export default function AlatBerat() {
                   </button>
                   {isAdmin && (
                     <button
-                      onClick={() => handleDelete(a.id)}
+                      onClick={() => setConfirmDeleteId(a.id)}
                       className="text-xs font-semibold text-red-600 hover:underline"
                     >
                       Hapus
@@ -348,6 +362,15 @@ export default function AlatBerat() {
           </form>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Hapus data alat?"
+        message="Riwayat sewa yang tertaut tidak akan terhapus, tapi data alat ini akan hilang permanen."
+        loading={deleting}
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => handleDelete(confirmDeleteId)}
+      />
     </div>
   )
 }

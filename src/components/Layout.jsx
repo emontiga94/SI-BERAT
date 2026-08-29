@@ -25,7 +25,7 @@ export default function Layout({ children }) {
             PUPR
           </div>
           <div className="leading-tight">
-            <p className="text-[13px] font-semibold tracking-wide text-white">SIMSEWA</p>
+            <p className="text-[13px] font-semibold tracking-wide text-white">SI-BERAT</p>
             <p className="text-[11px] text-white/50">Alat Berat &middot; NTT</p>
           </div>
         </div>

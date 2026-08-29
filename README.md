@@ -1,4 +1,4 @@
-# SIMSEWA — Aplikasi Sewa Alat Berat
+# SI-BERAT — Aplikasi Sewa Alat Berat
 Dinas Pekerjaan Umum dan Penataan Ruang Provinsi Nusa Tenggara Timur
 
 Aplikasi web untuk mengelola data alat berat, mencatat transaksi sewa, memantau

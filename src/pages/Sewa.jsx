@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { formatRupiah, formatDate } from '../lib/format'
 import { useAuth } from '../lib/AuthContext'
+import ConfirmDialog from '../components/ConfirmDialog'
 
 const emptyForm = {
   id: null,
@@ -67,9 +68,14 @@ export default function Sewa() {
     setShowForm(true)
   }
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null)
+  const [deleting, setDeleting] = useState(false)
+
   async function handleDelete(id) {
-    if (!window.confirm('Hapus data sewa ini?')) return
+    setDeleting(true)
     const { error } = await supabase.from('sewa').delete().eq('id', id)
+    setDeleting(false)
+    setConfirmDeleteId(null)
     if (error) {
       setErrorMsg(error.message)
       return
@@ -269,7 +275,7 @@ export default function Sewa() {
                   </button>
                   {isAdmin && (
                     <button
-                      onClick={() => handleDelete(s.id)}
+                      onClick={() => setConfirmDeleteId(s.id)}
                       className="text-xs font-semibold text-red-600 hover:underline"
                     >
                       Hapus
@@ -474,6 +480,15 @@ export default function Sewa() {
           </form>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDeleteId !== null}
+        title="Hapus data sewa?"
+        message="Data transaksi sewa ini akan dihapus permanen dan tidak bisa dikembalikan."
+        loading={deleting}
+        onCancel={() => setConfirmDeleteId(null)}
+        onConfirm={() => handleDelete(confirmDeleteId)}
+      />
     </div>
   )
 }
