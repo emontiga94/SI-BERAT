@@ -96,6 +96,37 @@ create trigger trg_sewa_updated_at
   for each row execute function set_updated_at();
 
 -- ----------------------------------------------------------------------------
+-- Peran pengguna — admin vs staf. Staf bisa lihat/tambah/ubah data, tapi
+-- hanya admin yang boleh menghapus data alat maupun transaksi sewa.
+-- ----------------------------------------------------------------------------
+create table if not exists user_roles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  role text not null default 'staf' check (role in ('admin', 'staf')),
+  created_at timestamptz not null default now()
+);
+
+alter table user_roles enable row level security;
+
+drop policy if exists "read own role" on user_roles;
+create policy "read own role" on user_roles
+  for select using (auth.uid() = user_id);
+
+create or replace function is_admin()
+returns boolean as $$
+  select exists (
+    select 1 from user_roles where user_id = auth.uid() and role = 'admin'
+  );
+$$ language sql stable security definer;
+
+-- PENTING — setelah menjalankan skrip ini, jadikan minimal satu akun sebagai
+-- admin secara manual (ganti EMAIL_ADMIN_ANDA di bawah), kalau tidak, tidak
+-- ada seorang pun yang bisa menghapus data:
+--
+--   insert into user_roles (user_id, role)
+--   select id, 'admin' from auth.users where email = 'EMAIL_ADMIN_ANDA'
+--   on conflict (user_id) do update set role = 'admin';
+
+-- ----------------------------------------------------------------------------
 -- Row Level Security — hanya pengguna yang login (admin/staf) yang boleh
 -- membaca dan mengubah data. Sesuaikan bila Anda ingin sebagian data publik.
 -- ----------------------------------------------------------------------------
@@ -116,7 +147,7 @@ create policy "update alat_berat" on alat_berat
 
 drop policy if exists "delete alat_berat" on alat_berat;
 create policy "delete alat_berat" on alat_berat
-  for delete using (auth.role() = 'authenticated');
+  for delete using (is_admin());
 
 drop policy if exists "read sewa" on sewa;
 create policy "read sewa" on sewa
@@ -132,7 +163,7 @@ create policy "update sewa" on sewa
 
 drop policy if exists "delete sewa" on sewa;
 create policy "delete sewa" on sewa
-  for delete using (auth.role() = 'authenticated');
+  for delete using (is_admin());
 
 -- ============================================================================
 -- SEED DATA — diambil dari file DAFTAR_ALAT_BERAT_082616.xls

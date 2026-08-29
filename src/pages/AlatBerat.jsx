@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import { formatRupiah } from '../lib/format'
+import { useAuth } from '../lib/AuthContext'
 
 const KONDISI_OPTIONS = [
   'Aktif',
@@ -30,6 +31,7 @@ const emptyForm = {
 }
 
 export default function AlatBerat() {
+  const { isAdmin } = useAuth()
   const [alat, setAlat] = useState([])
   const [loading, setLoading] = useState(true)
   const [errorMsg, setErrorMsg] = useState('')
@@ -37,6 +39,7 @@ export default function AlatBerat() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [search, setSearch] = useState('')
+  const [kondisiFilter, setKondisiFilter] = useState('Semua')
 
   async function loadAlat() {
     setLoading(true)
@@ -107,9 +110,13 @@ export default function AlatBerat() {
     loadAlat()
   }
 
-  const filtered = alat.filter((a) =>
-    `${a.nama_alat} ${a.kategori ?? ''} ${a.kode ?? ''}`.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = alat.filter((a) => {
+    const matchSearch = `${a.nama_alat} ${a.kategori ?? ''} ${a.kode ?? ''}`
+      .toLowerCase()
+      .includes(search.toLowerCase())
+    const matchKondisi = kondisiFilter === 'Semua' || a.kondisi === kondisiFilter
+    return matchSearch && matchKondisi
+  })
 
   const kategoriOptions = [...new Set(alat.map((a) => a.kategori).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b)
@@ -138,12 +145,26 @@ export default function AlatBerat() {
         </div>
       )}
 
-      <input
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Cari nama alat atau kategori&hellip;"
-        className="mb-4 w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-      />
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Cari nama alat atau kategori&hellip;"
+          className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+        />
+        <select
+          value={kondisiFilter}
+          onChange={(e) => setKondisiFilter(e.target.value)}
+          className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+        >
+          <option>Semua</option>
+          {KONDISI_OPTIONS.map((k) => (
+            <option key={k} value={k}>
+              {k}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
@@ -196,12 +217,14 @@ export default function AlatBerat() {
                   >
                     Ubah
                   </button>
-                  <button
-                    onClick={() => handleDelete(a.id)}
-                    className="text-xs font-semibold text-red-600 hover:underline"
-                  >
-                    Hapus
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDelete(a.id)}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Hapus
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}

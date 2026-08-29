@@ -22,7 +22,7 @@ const emptyForm = {
 }
 
 export default function Sewa() {
-  const { user } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [sewa, setSewa] = useState([])
   const [alatList, setAlatList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -87,8 +87,35 @@ export default function Sewa() {
     })
   }
 
+  function hitungJumlahHari(mulai, selesai) {
+    if (!mulai || !selesai) return null
+    const d1 = new Date(mulai)
+    const d2 = new Date(selesai)
+    if (Number.isNaN(d1.getTime()) || Number.isNaN(d2.getTime())) return null
+    const selisih = Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1
+    return selisih > 0 ? selisih : null
+  }
+
+  function handleTanggalChange(field, value) {
+    const next = { ...form, [field]: value }
+    const mulai = field === 'tanggal_mulai' ? value : form.tanggal_mulai
+    const selesai = field === 'tanggal_selesai' ? value : form.tanggal_selesai
+    const hari = hitungJumlahHari(mulai, selesai)
+    if (hari !== null) {
+      next.jumlah_hari = String(hari)
+    }
+    setForm(next)
+  }
+
+  const tanggalTidakValid =
+    form.tanggal_mulai && form.tanggal_selesai && new Date(form.tanggal_selesai) < new Date(form.tanggal_mulai)
+
   async function handleSubmit(e) {
     e.preventDefault()
+    if (tanggalTidakValid) {
+      setErrorMsg('Tanggal selesai tidak boleh sebelum tanggal mulai.')
+      return
+    }
     setSaving(true)
     setErrorMsg('')
 
@@ -240,12 +267,14 @@ export default function Sewa() {
                   >
                     Ubah
                   </button>
-                  <button
-                    onClick={() => handleDelete(s.id)}
-                    className="text-xs font-semibold text-red-600 hover:underline"
-                  >
-                    Hapus
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Hapus
+                    </button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -318,13 +347,13 @@ export default function Sewa() {
               className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
             />
 
-            <div className="mb-3 grid grid-cols-2 gap-3">
+            <div className="mb-1 grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-semibold text-navy-900/70">Tanggal Mulai</label>
                 <input
                   type="date"
                   value={form.tanggal_mulai}
-                  onChange={(e) => setForm({ ...form, tanggal_mulai: e.target.value })}
+                  onChange={(e) => handleTanggalChange('tanggal_mulai', e.target.value)}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
                 />
               </div>
@@ -333,11 +362,23 @@ export default function Sewa() {
                 <input
                   type="date"
                   value={form.tanggal_selesai}
-                  onChange={(e) => setForm({ ...form, tanggal_selesai: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                  onChange={(e) => handleTanggalChange('tanggal_selesai', e.target.value)}
+                  className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 ${
+                    tanggalTidakValid
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
+                      : 'border-slate-200 focus:border-navy-700 focus:ring-navy-700/20'
+                  }`}
                 />
               </div>
             </div>
+            {tanggalTidakValid && (
+              <p className="mb-2 text-xs font-medium text-red-600">
+                Tanggal selesai tidak boleh sebelum tanggal mulai.
+              </p>
+            )}
+            <p className="mb-3 text-xs text-navy-900/50">
+              Jumlah hari terisi otomatis dari tanggal mulai &amp; selesai — bisa diubah manual kalau perlu.
+            </p>
 
             <div className="mb-3 grid grid-cols-2 gap-3">
               <div>
@@ -424,7 +465,7 @@ export default function Sewa() {
               </button>
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || tanggalTidakValid}
                 className="rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800 disabled:opacity-60"
               >
                 {saving ? 'Menyimpan&hellip;' : 'Simpan'}

@@ -5,6 +5,7 @@ const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(undefined) // undefined = loading, null = logged out
+  const [role, setRole] = useState(null) // null = belum dimuat / staf secara default
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -16,10 +17,28 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe()
   }, [])
 
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) {
+      setRole(null)
+      return
+    }
+    supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        setRole(data?.role || 'staf')
+      })
+  }, [session?.user?.id])
+
   const value = {
     session,
     user: session?.user ?? null,
     loading: session === undefined,
+    role,
+    isAdmin: role === 'admin',
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signOut: () => supabase.auth.signOut(),
   }
