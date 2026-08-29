@@ -253,26 +253,26 @@ function HeroBackground() {
       ))}
 
       {/* Overlay gradasi supaya teks & form tetap terbaca */}
-      <div className="absolute inset-0 bg-navy-950/55" />
+      <div className="absolute inset-0 bg-navy-950/10" />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(90deg, rgba(10,27,48,0.85) 0%, rgba(10,27,48,0.35) 45%, rgba(10,27,48,0) 100%)',
+            'linear-gradient(90deg, rgba(10,27,48,0.4) 0%, rgba(10,27,48,0.1) 45%, rgba(10,27,48,0) 100%)',
         }}
       />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'linear-gradient(180deg, rgba(10,27,48,0) 0%, rgba(10,27,48,0.9) 100%)',
+            'linear-gradient(180deg, rgba(10,27,48,0) 0%, rgba(10,27,48,0.5) 100%)',
         }}
       />
       <div
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(55% 55% at 80% 50%, rgba(10,27,48,0.55) 0%, rgba(10,27,48,0) 100%)',
+            'radial-gradient(55% 55% at 80% 50%, rgba(10,27,48,0.18) 0%, rgba(10,27,48,0) 100%)',
         }}
       />
 
