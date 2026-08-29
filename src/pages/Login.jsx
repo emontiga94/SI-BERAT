@@ -83,12 +83,12 @@ export default function Login() {
           alt="Sigap Membangun Negeri"
           className="mt-5 h-10 w-auto opacity-90 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] sm:h-12"
         />
-        <p className="relative z-20 mt-6 text-2xs text-white/40">
+        <p className="relative z-30 mt-6 text-2xs text-white/40">
           Dinas PUPR Provinsi NTT &middot; SI-BERAT v1.0
           {' '}&middot;{' '}
           <Link
             to="/info-sewa"
-            className="relative z-20 inline-block py-1 underline decoration-white/30 underline-offset-2 hover:text-white/70"
+            className="relative z-30 inline-block cursor-pointer px-1 py-2 -mx-1 underline decoration-white/30 underline-offset-2 hover:text-white/70"
           >
             Info Sewa Alat Berat
           </Link>
@@ -228,7 +228,7 @@ function HeroBackground() {
   }, [])
 
   return (
-    <div className="absolute inset-0 h-full w-full overflow-hidden bg-navy-950">
+    <div className="pointer-events-none absolute inset-0 h-full w-full overflow-hidden bg-navy-950">
       {/* Foto alat berat — crossfade bergantian */}
       {BG_IMAGES.map((src, index) => (
         <div
@@ -268,7 +268,7 @@ function HeroBackground() {
       />
 
       {/* Indikator slide */}
-      <div className="absolute bottom-16 left-6 z-10 flex gap-1.5 sm:left-9 lg:bottom-6">
+      <div className="absolute bottom-24 left-6 z-10 flex gap-1.5 sm:left-9 lg:bottom-20">
         {BG_IMAGES.map((src, index) => (
           <span
             key={src}
