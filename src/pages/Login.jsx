@@ -11,6 +11,10 @@ const BG_IMAGES = [
   '/assets/bg-alat-berat-2.jpg',
   '/assets/bg-alat-berat-3.jpg',
   '/assets/bg-alat-berat-4.jpg',
+  '/assets/bg-alat-berat-5.jpg',
+  '/assets/bg-alat-berat-6.jpg',
+  '/assets/bg-alat-berat-7.jpg',
+  '/assets/bg-alat-berat-8.jpg',
 ]
 
 export default function Login() {
