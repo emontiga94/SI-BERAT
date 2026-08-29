@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 import { todayLong } from '../lib/format'
@@ -9,10 +9,72 @@ const navItems = [
   { to: '/sewa', label: 'Rekap Sewa', icon: IconClipboard },
 ]
 
+const BG_IMAGES = [
+  '/assets/bg-alat-berat-1.jpg',
+  '/assets/bg-alat-berat-2.jpg',
+  '/assets/bg-alat-berat-3.jpg',
+  '/assets/bg-alat-berat-4.jpg',
+  '/assets/bg-alat-berat-5.jpg',
+  '/assets/bg-alat-berat-6.jpg',
+  '/assets/bg-alat-berat-7.jpg',
+  '/assets/bg-alat-berat-8.jpg',
+]
+
+const SIDEBAR_SLIDE_DURATION = 6000 // ms per foto sebelum transisi ke foto berikutnya
+const SIDEBAR_COLLAPSE_KEY = 'siberat_sidebar_collapsed'
+
+function SidebarBackground() {
+  const [activeIndex, setActiveIndex] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveIndex((i) => (i + 1) % BG_IMAGES.length)
+    }, SIDEBAR_SLIDE_DURATION)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+      {BG_IMAGES.map((src, index) => (
+        <div
+          key={src}
+          aria-hidden={index !== activeIndex}
+          className="absolute inset-0 h-full w-full bg-cover bg-center"
+          style={{
+            backgroundImage: `url(${src})`,
+            opacity: index === activeIndex ? 1 : 0,
+            transition: 'opacity 1800ms ease-in-out',
+          }}
+        />
+      ))}
+      {/* Overlay navy supaya teks & ikon tetap terbaca */}
+      <div className="absolute inset-0 bg-navy-950/80" />
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(180deg, rgba(10,27,48,0.55) 0%, rgba(10,27,48,0.92) 100%)',
+        }}
+      />
+    </div>
+  )
+}
+
 export default function Layout({ children }) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.localStorage.getItem(SIDEBAR_COLLAPSE_KEY) === '1'
+  })
+
+  function toggleCollapsed() {
+    setCollapsed((v) => {
+      const next = !v
+      window.localStorage.setItem(SIDEBAR_COLLAPSE_KEY, next ? '1' : '0')
+      return next
+    })
+  }
 
   async function handleSignOut() {
     await signOut()
@@ -38,40 +100,37 @@ export default function Layout({ children }) {
       )}
 
       <aside
-        className={`no-print fixed inset-y-0 left-0 z-40 flex w-64 flex-shrink-0 flex-col bg-navy-gradient text-white transition-transform duration-200 lg:static lg:translate-x-0 ${
+        className={`no-print fixed inset-y-0 left-0 z-40 flex flex-shrink-0 flex-col text-white transition-[transform,width] duration-200 lg:static lg:translate-x-0 ${
           mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        } ${collapsed ? 'w-64 lg:w-20' : 'w-64'}`}
       >
-        <div className="flex items-center gap-3 px-6 py-6">
-          <div className="relative flex h-11 w-11 flex-none items-center justify-center">
-            <svg viewBox="0 0 44 44" className="h-11 w-11">
-              <polygon
-                points="22,1.5 40,11.5 40,32.5 22,42.5 4,32.5 4,11.5"
-                fill="#0F2A4A"
-                stroke="url(#emblemGrad)"
-                strokeWidth="1.6"
-              />
-              <defs>
-                <linearGradient id="emblemGrad" x1="0" y1="0" x2="44" y2="44">
-                  <stop offset="0%" stopColor="#DDB868" />
-                  <stop offset="100%" stopColor="#B5852E" />
-                </linearGradient>
-              </defs>
-              <text
-                x="22"
-                y="26"
-                textAnchor="middle"
-                fontSize="11"
-                fontWeight="700"
-                letterSpacing="0.5"
-                fill="#DDB868"
-                fontFamily="'IBM Plex Sans', sans-serif"
-              >
-                PUPR
-              </text>
-            </svg>
-          </div>
-          <div className="min-w-0 leading-tight">
+        <SidebarBackground />
+
+        {/* Tombol ciutkan/lebarkan — hanya desktop */}
+        <button
+          onClick={toggleCollapsed}
+          className="absolute -right-3 top-8 z-10 hidden h-6 w-6 flex-none items-center justify-center rounded-full border border-white/20 bg-navy-900 text-white/70 shadow-md transition-colors hover:bg-navy-700 hover:text-white lg:flex"
+          aria-label={collapsed ? 'Lebarkan sidebar' : 'Ciutkan sidebar'}
+          title={collapsed ? 'Lebarkan sidebar' : 'Ciutkan sidebar'}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`h-3.5 w-3.5 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
+          >
+            <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+
+        <div className={`flex items-center gap-3 px-6 py-6 ${collapsed ? 'lg:justify-center lg:px-0' : ''}`}>
+          <img
+            src="/assets/logo-pupr-icon.png"
+            alt="Logo PUPR"
+            className="h-11 w-11 flex-none object-contain drop-shadow-[0_4px_10px_rgba(0,0,0,0.4)]"
+          />
+          <div className={`min-w-0 leading-tight ${collapsed ? 'lg:hidden' : ''}`}>
             <p className="truncate text-[13px] font-semibold tracking-wide text-white">SI-BERAT</p>
             <p className="truncate text-[11px] text-white/45">Alat Berat &middot; NTT</p>
           </div>
@@ -86,7 +145,9 @@ export default function Layout({ children }) {
           </button>
         </div>
 
-        <p className="mb-2 mt-4 px-6 text-2xs font-bold uppercase tracking-widest text-white/25">Navigasi</p>
+        <p className={`mb-2 mt-4 px-6 text-2xs font-bold uppercase tracking-widest text-white/25 ${collapsed ? 'lg:hidden' : ''}`}>
+          Navigasi
+        </p>
         <nav className="flex-1 space-y-1 px-3">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
@@ -94,8 +155,11 @@ export default function Layout({ children }) {
               to={to}
               end={end}
               onClick={() => setMobileOpen(false)}
+              title={collapsed ? label : undefined}
               className={({ isActive }) =>
                 `group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                  collapsed ? 'lg:justify-center lg:px-0' : ''
+                } ${
                   isActive
                     ? 'bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
                     : 'text-white/60 hover:bg-white/5 hover:text-white'
@@ -110,7 +174,7 @@ export default function Layout({ children }) {
                     }`}
                   />
                   <Icon className={`h-[18px] w-[18px] flex-none ${isActive ? 'text-amber-400' : ''}`} />
-                  {label}
+                  <span className={collapsed ? 'lg:hidden' : ''}>{label}</span>
                 </>
               )}
             </NavLink>
@@ -118,23 +182,24 @@ export default function Layout({ children }) {
         </nav>
 
         <div className="border-t border-white/10 px-4 py-4">
-          <div className="mb-3 flex items-center gap-2.5 rounded-xl bg-white/5 px-3 py-2.5">
+          <div className={`mb-3 flex items-center gap-2.5 rounded-xl bg-white/5 px-3 py-2.5 ${collapsed ? 'lg:justify-center lg:px-2' : ''}`}>
             <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-amber-gradient text-xs font-bold text-navy-950">
               {initials || 'U'}
             </div>
-            <div className="min-w-0">
+            <div className={`min-w-0 ${collapsed ? 'lg:hidden' : ''}`}>
               <p className="truncate text-xs font-medium text-white/90">{user?.email}</p>
               <p className="text-2xs text-white/40">Masuk</p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:border-white/25 hover:bg-white/5 hover:text-white"
+            title={collapsed ? 'Keluar' : undefined}
+            className={`flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:border-white/25 hover:bg-white/5 hover:text-white`}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5 flex-none">
               <path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            Keluar
+            <span className={collapsed ? 'lg:hidden' : ''}>Keluar</span>
           </button>
         </div>
       </aside>
