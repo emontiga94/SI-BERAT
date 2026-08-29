@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
+import { todayLong } from '../lib/format'
 
 const navItems = [
   { to: '/', label: 'Ringkasan', icon: IconGrid, end: true },
@@ -151,6 +152,14 @@ export default function Layout({ children }) {
           </button>
           <p className="text-sm font-semibold text-navy-950">SI-BERAT</p>
         </header>
+
+        <div className="no-print hidden items-center justify-between border-b border-slate-200/70 bg-white/70 px-8 py-2.5 backdrop-blur lg:flex">
+          <div className="flex items-center gap-1.5 text-2xs font-medium text-navy-900/45">
+            <span className="h-1.5 w-1.5 flex-none animate-pulse rounded-full bg-emerald-500" />
+            Sistem aktif &middot; Dinas PUPR Provinsi NTT
+          </div>
+          <p className="text-2xs font-medium text-navy-900/45">{todayLong()}</p>
+        </div>
 
         <main className="flex-1 overflow-y-auto">
           <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 md:px-10">{children}</div>
