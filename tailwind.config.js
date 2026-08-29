@@ -68,6 +68,10 @@ export default {
           from: { opacity: 0, transform: 'translateX(-8px)' },
           to: { opacity: 1, transform: 'translateX(0)' },
         },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'overlay-in': 'overlay-in 180ms ease-out',
@@ -76,6 +80,7 @@ export default {
         shimmer: 'shimmer 1.6s ease-in-out infinite',
         'fade-in': 'fade-in 240ms ease-out',
         'slide-in-right': 'slide-in-right 200ms ease-out',
+        marquee: 'marquee 28s linear infinite',
       },
     },
   },

@@ -4,6 +4,7 @@ import { AuthProvider } from './lib/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import InfoSewaAlatBerat from './pages/InfoSewaAlatBerat'
 import Dashboard from './pages/Dashboard'
 import AlatBerat from './pages/AlatBerat'
 import Sewa from './pages/Sewa'
@@ -15,6 +16,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/info-sewa" element={<InfoSewaAlatBerat />} />
         <Route
           path="/sewa/:id/cetak"
           element={

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 import Button from '../components/ui/Button'
 import { FieldLabel, TextInput } from '../components/ui/Field'
@@ -87,6 +87,10 @@ export default function Login() {
 
       <p className="absolute bottom-5 left-6 z-10 text-2xs text-white/40 sm:left-9">
         Dinas PUPR Provinsi NTT &middot; SI-BERAT v1.0
+        {' '}&middot;{' '}
+        <Link to="/info-sewa" className="underline decoration-white/30 underline-offset-2 hover:text-white/70">
+          Info Sewa Alat Berat
+        </Link>
       </p>
 
       {/* Kartu login — mengambang di kanan */}
