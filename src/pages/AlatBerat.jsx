@@ -21,6 +21,7 @@ const KONDISI_STYLES = {
 const emptyForm = {
   id: null,
   kode: '',
+  urutan: '',
   nama_alat: '',
   kategori: '',
   harga_per_hari: '',
@@ -42,7 +43,7 @@ export default function AlatBerat() {
     const { data, error } = await supabase
       .from('alat_berat')
       .select('*')
-      .order('kategori', { ascending: true, nullsFirst: true })
+      .order('urutan', { ascending: true, nullsFirst: false })
       .order('nama_alat', { ascending: true })
     if (error) setErrorMsg(error.message)
     setAlat(data || [])
@@ -59,7 +60,11 @@ export default function AlatBerat() {
   }
 
   function openEdit(item) {
-    setForm({ ...item, harga_per_hari: String(item.harga_per_hari ?? '') })
+    setForm({
+      ...item,
+      harga_per_hari: String(item.harga_per_hari ?? ''),
+      urutan: item.urutan === null || item.urutan === undefined ? '' : String(item.urutan),
+    })
     setShowForm(true)
   }
 
@@ -80,6 +85,7 @@ export default function AlatBerat() {
 
     const payload = {
       kode: form.kode || null,
+      urutan: form.urutan === '' ? null : Number(form.urutan),
       nama_alat: form.nama_alat,
       kategori: form.kategori || null,
       harga_per_hari: Number(form.harga_per_hari || 0),
@@ -103,6 +109,10 @@ export default function AlatBerat() {
 
   const filtered = alat.filter((a) =>
     `${a.nama_alat} ${a.kategori ?? ''} ${a.kode ?? ''}`.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const kategoriOptions = [...new Set(alat.map((a) => a.kategori).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b)
   )
 
   return (
@@ -219,16 +229,37 @@ export default function AlatBerat() {
                   placeholder="opsional"
                 />
               </div>
-              <div className="col-span-2">
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Urutan Tampil</label>
+                <input
+                  type="number"
+                  step="1"
+                  value={form.urutan}
+                  onChange={(e) => setForm({ ...form, urutan: e.target.value })}
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                  placeholder="mis. 10"
+                />
+              </div>
+              <div>
                 <label className="mb-1 block text-xs font-semibold text-navy-900/70">Kategori</label>
                 <input
+                  list="kategori-options"
                   value={form.kategori || ''}
                   onChange={(e) => setForm({ ...form, kategori: e.target.value })}
                   className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                  placeholder="mis. Excavator Bucket"
+                  placeholder="pilih atau ketik baru"
                 />
+                <datalist id="kategori-options">
+                  {kategoriOptions.map((k) => (
+                    <option key={k} value={k} />
+                  ))}
+                </datalist>
               </div>
             </div>
+            <p className="mb-3 -mt-2 text-xs text-navy-900/50">
+              Urutan tampil menentukan posisi alat di daftar (angka kecil tampil lebih dulu). Alat dengan urutan
+              sama akan diurutkan berdasarkan nama.
+            </p>
 
             <label className="mb-1 block text-xs font-semibold text-navy-900/70">Nama Alat</label>
             <input

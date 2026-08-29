@@ -11,6 +11,7 @@ create extension if not exists pgcrypto;
 create table if not exists alat_berat (
   id uuid primary key default gen_random_uuid(),
   kode text,
+  urutan integer,
   nama_alat text not null,
   kategori text,
   harga_per_hari numeric(15,2) not null default 0,
@@ -26,6 +27,17 @@ create table if not exists alat_berat (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+-- Kalau tabel alat_berat sudah ada sebelumnya (dibuat sebelum kolom urutan
+-- ditambahkan), baris di bawah ini menambahkan kolomnya tanpa mengubah data.
+alter table alat_berat add column if not exists urutan integer;
+
+-- Isi urutan awal untuk baris lama yang sudah ada di database (kalau kode-nya
+-- persis angka, mis. '1'..'15'). Baris dengan kode campuran huruf (mis. '4a')
+-- atau kode kosong perlu diisi manual lewat form "Ubah" di aplikasi.
+update alat_berat
+set urutan = (kode::integer) * 10
+where urutan is null and kode ~ '^[0-9]+$';
 
 -- ----------------------------------------------------------------------------
 -- Tabel: sewa  (transaksi sewa, dari "REKAP SEWA ALAT BERAT")
@@ -121,24 +133,24 @@ create policy "delete sewa" on sewa
 -- SEED DATA — diambil dari file DAFTAR_ALAT_BERAT_082616.xls
 -- (harga berdasarkan Perda NTT No. 1 Tahun 2024)
 -- ============================================================================
-insert into alat_berat (kode, nama_alat, kategori, harga_per_hari, kondisi, keterangan) values
-  ('1',  'Buldozer Merk Caterpillar',                              null,              3400000,  'Tidak Aktif / Rusak Berat', null),
-  ('2',  'Motor Grader',                                           null,              0,        'Tidak Ada', null),
-  ('3',  'Loader On Wheel',                                        null,              2000000,  'Aktif', null),
-  ('4a', 'Merk Komatshu GD 31 rca',                                'Excavator Bucket', 1912500,  'Aktif', null),
-  ('4b', 'Merk Caterpillar 3298',                                  'Excavator Bucket', 2550000,  'Tidak Aktif / Rusak Berat', null),
-  ('4c', 'Merk Komatshu PC 200',                                   'Excavator Bucket', 2550000,  'Aktif', null),
-  ('5',  'Excavator Breaker Caterpilar 926',                       null,              3570000,  'Aktif', null),
-  ('6',  'Vibrator Roller Merk Bomag Single Drum BW 211D-40',      null,              2125000,  'Aktif', null),
-  ('7',  'Thandem Roller Merk Bomag BW 100 AD-5',                  null,              1275000,  'Aktif', null),
-  ('8',  'Tire Roller Merk Sakai TS-7409',                         null,              1487500,  'Tidak Ada', null),
-  ('9',  'Sheep Foot Roller Merk Ingersoll Rand SP.48',            null,              1275000,  'Tidak Ada', null),
-  ('10', 'Trailer/Tronton Merk Nissan Diesel RD 80',                null,              2125000,  'Aktif', null),
-  ('11', 'Mobil Tangki',                                            null,              637500,   'Aktif / Lainnya', 'Di Sekretariat'),
-  ('12', 'Track Loader',                                            null,              2125000,  'Tidak Ada', null),
-  ('13', 'Dump Truck',                                              null,              425000,   'Aktif / Lainnya', 'Di Laboratorium'),
-  ('14', 'Truck Crane',                                             null,              1700000,  'Tidak Aktif / Rusak Ringan', null),
-  ('15', 'Mini Excavator',                                          null,              1500000,  'Aktif', null);
+insert into alat_berat (kode, urutan, nama_alat, kategori, harga_per_hari, kondisi, keterangan) values
+  ('1',  10,  'Buldozer Merk Caterpillar',                              'Alat Berat',        3400000,  'Tidak Aktif / Rusak Berat', null),
+  ('2',  20,  'Motor Grader',                                           'Alat Berat',        0,        'Tidak Ada', null),
+  ('3',  30,  'Loader On Wheel',                                        'Alat Berat',        2000000,  'Aktif', null),
+  ('4a', 40,  'Merk Komatshu GD 31 rca',                                'Excavator Bucket',  1912500,  'Aktif', null),
+  ('4b', 41,  'Merk Caterpillar 3298',                                  'Excavator Bucket',  2550000,  'Tidak Aktif / Rusak Berat', null),
+  ('4c', 42,  'Merk Komatshu PC 200',                                   'Excavator Bucket',  2550000,  'Aktif', null),
+  ('5',  50,  'Excavator Breaker Caterpilar 926',                       'Alat Berat',        3570000,  'Aktif', null),
+  ('6',  60,  'Vibrator Roller Merk Bomag Single Drum BW 211D-40',      'Alat Berat',        2125000,  'Aktif', null),
+  ('7',  70,  'Thandem Roller Merk Bomag BW 100 AD-5',                  'Alat Berat',        1275000,  'Aktif', null),
+  ('8',  80,  'Tire Roller Merk Sakai TS-7409',                         'Alat Berat',        1487500,  'Tidak Ada', null),
+  ('9',  90,  'Sheep Foot Roller Merk Ingersoll Rand SP.48',            'Alat Berat',        1275000,  'Tidak Ada', null),
+  ('10', 100, 'Trailer/Tronton Merk Nissan Diesel RD 80',                'Alat Berat',        2125000,  'Aktif', null),
+  ('11', 110, 'Mobil Tangki',                                            'Alat Berat',        637500,   'Aktif / Lainnya', 'Di Sekretariat'),
+  ('12', 120, 'Track Loader',                                            'Alat Berat',        2125000,  'Tidak Ada', null),
+  ('13', 130, 'Dump Truck',                                              'Alat Berat',        425000,   'Aktif / Lainnya', 'Di Laboratorium'),
+  ('14', 140, 'Truck Crane',                                             'Alat Berat',        1700000,  'Tidak Aktif / Rusak Ringan', null),
+  ('15', 150, 'Mini Excavator',                                          'Alat Berat',        1500000,  'Aktif', null);
 
 -- ============================================================================
 -- SEED DATA — diambil dari file REKAP_SEWA_ALAT_BERAT_PERIODE_JANUARI_SD_JULI_2026.xlsx

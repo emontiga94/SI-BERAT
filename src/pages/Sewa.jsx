@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { formatRupiah, formatDate } from '../lib/format'
+import { useAuth } from '../lib/AuthContext'
 
 const emptyForm = {
   id: null,
@@ -21,6 +22,7 @@ const emptyForm = {
 }
 
 export default function Sewa() {
+  const { user } = useAuth()
   const [sewa, setSewa] = useState([])
   const [alatList, setAlatList] = useState([])
   const [loading, setLoading] = useState(true)
@@ -108,7 +110,7 @@ export default function Sewa() {
 
     const query = form.id
       ? supabase.from('sewa').update(payload).eq('id', form.id)
-      : supabase.from('sewa').insert(payload)
+      : supabase.from('sewa').insert({ ...payload, dibuat_oleh: user?.id || null })
 
     const { error } = await query
     setSaving(false)
