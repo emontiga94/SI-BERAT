@@ -5,8 +5,8 @@ import { todayLong } from '../lib/format'
 
 const navItems = [
   { to: '/', label: 'Ringkasan', icon: IconGrid, end: true },
-  { to: '/alat', label: 'Data Alat Berat', icon: IconTruck },
-  { to: '/sewa', label: 'Rekap Sewa', icon: IconClipboard },
+  { to: '/alat', label: 'Daftar Alat Berat', icon: IconTruck },
+  { to: '/sewa', label: 'Rekapitulasi Retribusi Alat Berat', icon: IconClipboard },
 ]
 
 const BG_IMAGES = [
@@ -48,11 +48,11 @@ function SidebarBackground() {
         />
       ))}
       {/* Overlay navy supaya teks & ikon tetap terbaca */}
-      <div className="absolute inset-0 bg-navy-950/80" />
+      <div className="absolute inset-0 bg-navy-950/10" />
       <div
         className="absolute inset-0"
         style={{
-          background: 'linear-gradient(180deg, rgba(10,27,48,0.55) 0%, rgba(10,27,48,0.92) 100%)',
+          background: 'linear-gradient(180deg, rgba(10,27,48,0.15) 0%, rgba(10,27,48,0.55) 100%)',
         }}
       />
     </div>
@@ -157,7 +157,7 @@ export default function Layout({ children }) {
               onClick={() => setMobileOpen(false)}
               title={collapsed ? label : undefined}
               className={({ isActive }) =>
-                `group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
+                `group relative flex items-start gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium leading-snug transition-all duration-150 ${
                   collapsed ? 'lg:justify-center lg:px-0' : ''
                 } ${
                   isActive
@@ -173,7 +173,7 @@ export default function Layout({ children }) {
                       isActive ? 'opacity-100' : 'opacity-0'
                     }`}
                   />
-                  <Icon className={`h-[18px] w-[18px] flex-none ${isActive ? 'text-amber-400' : ''}`} />
+                  <Icon className={`mt-0.5 h-[18px] w-[18px] flex-none ${isActive ? 'text-amber-400' : ''}`} />
                   <span className={collapsed ? 'lg:hidden' : ''}>{label}</span>
                 </>
               )}
