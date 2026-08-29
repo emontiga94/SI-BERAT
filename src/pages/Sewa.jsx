@@ -4,6 +4,11 @@ import { supabase } from '../supabaseClient'
 import { formatRupiah, formatDate } from '../lib/format'
 import { useAuth } from '../lib/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
+import Button from '../components/ui/Button'
+import Badge from '../components/ui/Badge'
+import Modal, { ModalBody, ModalFooter, FieldSection } from '../components/ui/Modal'
+import { FieldLabel, TextInput, Select, Textarea, CurrencyInput } from '../components/ui/Field'
+import { SkeletonTableRows } from '../components/ui/Skeleton'
 
 const emptyForm = {
   id: null,
@@ -171,315 +176,287 @@ export default function Sewa() {
     <div>
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-navy-950">Rekap Sewa Alat Berat</h1>
-          <p className="mt-1 text-sm text-navy-900/60">Catatan transaksi sewa dan status pembayaran.</p>
+          <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-amber-700/70">Transaksi</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-navy-950">Rekap Sewa Alat Berat</h1>
+          <p className="mt-1.5 text-sm text-navy-900/55">Catatan transaksi sewa dan status pembayaran.</p>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-800"
-        >
-          + Tambah Sewa
-        </button>
+        <Button onClick={openCreate} icon={<IconPlus />}>
+          Tambah Sewa
+        </Button>
       </header>
 
       {errorMsg && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <IconAlert />
           {errorMsg}
         </div>
       )}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari penyewa, alat, atau lokasi&hellip;"
-          className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-        />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-        >
-          <option>Semua</option>
-          <option>Lunas</option>
-          <option>Belum Lunas</option>
-        </select>
-        <span className="ml-auto text-sm text-navy-900/60">
-          Total: <span className="font-semibold text-navy-950">{formatRupiah(totalFiltered)}</span>
+        <div className="relative w-full max-w-sm">
+          <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-900/30" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari penyewa, alat, atau lokasi\u2026"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15"
+          />
+        </div>
+        <div className="w-44">
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+            <option>Semua</option>
+            <option>Lunas</option>
+            <option>Belum Lunas</option>
+          </Select>
+        </div>
+        <span className="ml-auto rounded-full bg-navy-900/5 px-3.5 py-1.5 text-sm text-navy-900/70">
+          Total: <span className="font-mono font-semibold text-navy-950">{formatRupiah(totalFiltered)}</span>
         </span>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-navy-900/50">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Penyewa</th>
-              <th className="px-4 py-3 font-semibold">Alat</th>
-              <th className="px-4 py-3 font-semibold">Periode Sewa</th>
-              <th className="px-4 py-3 font-semibold">Hari</th>
-              <th className="px-4 py-3 font-semibold">Jumlah Harga</th>
-              <th className="px-4 py-3 font-semibold">Status</th>
-              <th className="px-4 py-3 font-semibold text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading && (
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50/80 text-2xs uppercase tracking-wide text-navy-900/45">
               <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-navy-900/50">
-                  Memuat data&hellip;
-                </td>
+                <th className="px-4 py-3 font-semibold">Penyewa</th>
+                <th className="px-4 py-3 font-semibold">Alat</th>
+                <th className="px-4 py-3 font-semibold">Periode Sewa</th>
+                <th className="px-4 py-3 font-semibold">Hari</th>
+                <th className="px-4 py-3 font-semibold">Jumlah Harga</th>
+                <th className="px-4 py-3 font-semibold">Status</th>
+                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
               </tr>
-            )}
-            {!loading && filtered.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-4 py-6 text-center text-navy-900/50">
-                  Tidak ada data sewa yang cocok.
-                </td>
-              </tr>
-            )}
-            {filtered.map((s) => (
-              <tr key={s.id} className="hover:bg-slate-50/60">
-                <td className="px-4 py-3">
-                  <p className="font-medium text-navy-950">{s.nama_penyewa}</p>
-                  <p className="text-xs text-navy-900/50">{s.jenis_penyewa}</p>
-                </td>
-                <td className="px-4 py-3 text-navy-900/70">{s.nama_alat_snapshot || '-'}</td>
-                <td className="px-4 py-3 text-navy-900/70">
-                  {s.tanggal_mulai ? `${formatDate(s.tanggal_mulai)} s.d ${formatDate(s.tanggal_selesai)}` : (s.periode || '-')}
-                </td>
-                <td className="px-4 py-3 font-mono text-navy-950">{s.jumlah_hari}</td>
-                <td className="px-4 py-3 font-mono text-navy-950">{formatRupiah(s.jumlah_harga)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block rounded-full border px-2.5 py-1 text-xs font-medium ${
-                      s.status_pembayaran === 'Lunas'
-                        ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                        : 'border-amber-200 bg-amber-50 text-amber-700'
-                    }`}
-                  >
-                    {s.status_pembayaran}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right whitespace-nowrap">
-                  <Link
-                    to={`/sewa/${s.id}/cetak`}
-                    className="mr-3 text-xs font-semibold text-navy-700 hover:underline"
-                  >
-                    Cetak
-                  </Link>
-                  <button
-                    onClick={() => openEdit(s)}
-                    className="mr-3 text-xs font-semibold text-navy-700 hover:underline"
-                  >
-                    Ubah
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => setConfirmDeleteId(s.id)}
-                      className="text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      Hapus
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading && <SkeletonTableRows rows={5} cols={7} />}
+              {!loading && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={7} className="px-4 py-12 text-center">
+                    <p className="text-sm font-medium text-navy-900/50">Tidak ada data sewa yang cocok</p>
+                    <p className="mt-1 text-xs text-navy-900/35">Coba ubah kata kunci pencarian atau filter status.</p>
+                  </td>
+                </tr>
+              )}
+              {filtered.map((s) => (
+                <tr key={s.id} className="transition-colors hover:bg-slate-50/60">
+                  <td className="px-4 py-3.5">
+                    <p className="font-medium text-navy-950">{s.nama_penyewa}</p>
+                    <p className="text-xs text-navy-900/45">{s.jenis_penyewa}</p>
+                  </td>
+                  <td className="px-4 py-3.5 text-navy-900/65">{s.nama_alat_snapshot || '-'}</td>
+                  <td className="px-4 py-3.5 text-navy-900/65">
+                    {s.tanggal_mulai ? `${formatDate(s.tanggal_mulai)} s.d ${formatDate(s.tanggal_selesai)}` : (s.periode || '-')}
+                  </td>
+                  <td className="px-4 py-3.5 font-mono text-navy-950">{s.jumlah_hari}</td>
+                  <td className="px-4 py-3.5 font-mono text-navy-950">{formatRupiah(s.jumlah_harga)}</td>
+                  <td className="px-4 py-3.5">
+                    <Badge tone={s.status_pembayaran === 'Lunas' ? 'emerald' : 'amber'}>{s.status_pembayaran}</Badge>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center justify-end gap-1">
+                      <Link
+                        to={`/sewa/${s.id}/cetak`}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-navy-700 transition-colors hover:bg-navy-50"
+                        aria-label="Cetak"
+                        title="Cetak"
+                      >
+                        <IconPrinter />
+                      </Link>
+                      <button
+                        onClick={() => openEdit(s)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-navy-700 transition-colors hover:bg-navy-50"
+                        aria-label="Ubah"
+                        title="Ubah"
+                      >
+                        <IconEdit />
+                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setConfirmDeleteId(s.id)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-50"
+                          aria-label="Hapus"
+                          title="Hapus"
+                        >
+                          <IconTrash />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {showForm && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center overflow-y-auto bg-navy-950/40 px-4 py-8">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl"
-          >
-            <h2 className="mb-4 text-base font-semibold text-navy-950">
-              {form.id ? 'Ubah Data Sewa' : 'Tambah Transaksi Sewa'}
-            </h2>
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={form.id ? 'Ubah Data Sewa' : 'Tambah Transaksi Sewa'}
+        description={form.id ? 'Perbarui detail transaksi sewa.' : 'Catat transaksi sewa alat berat baru.'}
+        icon={<IconClipboard />}
+        widthClass="max-w-lg"
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <ModalBody>
+            <FieldSection label="Penyewa">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <FieldLabel required>Nama Penyewa</FieldLabel>
+                  <TextInput
+                    required
+                    value={form.nama_penyewa}
+                    onChange={(e) => setForm({ ...form, nama_penyewa: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Jenis</FieldLabel>
+                  <Select value={form.jenis_penyewa} onChange={(e) => setForm({ ...form, jenis_penyewa: e.target.value })}>
+                    <option>Instansi</option>
+                    <option>Perorangan</option>
+                  </Select>
+                </div>
+              </div>
+            </FieldSection>
 
-            <div className="mb-3 grid grid-cols-3 gap-3">
-              <div className="col-span-2">
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Nama Penyewa</label>
-                <input
+            <FieldSection label="Alat & Lokasi">
+              <div>
+                <FieldLabel hint="opsional">Pilih dari Armada</FieldLabel>
+                <Select value={form.alat_id} onChange={(e) => handleAlatChange(e.target.value)}>
+                  <option value="">-- Tidak dari daftar armada --</option>
+                  {alatList.map((a) => (
+                    <option key={a.id} value={a.id}>
+                      {a.nama_alat} ({formatRupiah(a.harga_per_hari)}/hari)
+                    </option>
+                  ))}
+                </Select>
+              </div>
+              <div>
+                <FieldLabel required hint="tampil di cetak">Nama Alat</FieldLabel>
+                <TextInput
                   required
-                  value={form.nama_penyewa}
-                  onChange={(e) => setForm({ ...form, nama_penyewa: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                  value={form.nama_alat_snapshot}
+                  onChange={(e) => setForm({ ...form, nama_alat_snapshot: e.target.value })}
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Jenis</label>
-                <select
-                  value={form.jenis_penyewa}
-                  onChange={(e) => setForm({ ...form, jenis_penyewa: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                >
-                  <option>Instansi</option>
-                  <option>Perorangan</option>
-                </select>
-              </div>
-            </div>
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">
-              Alat (pilih dari armada, opsional)
-            </label>
-            <select
-              value={form.alat_id}
-              onChange={(e) => handleAlatChange(e.target.value)}
-              className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            >
-              <option value="">-- Tidak dari daftar armada --</option>
-              {alatList.map((a) => (
-                <option key={a.id} value={a.id}>
-                  {a.nama_alat} ({formatRupiah(a.harga_per_hari)}/hari)
-                </option>
-              ))}
-            </select>
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Nama Alat (tampil di cetak)</label>
-            <input
-              required
-              value={form.nama_alat_snapshot}
-              onChange={(e) => setForm({ ...form, nama_alat_snapshot: e.target.value })}
-              className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Lokasi</label>
-            <input
-              value={form.lokasi}
-              onChange={(e) => setForm({ ...form, lokasi: e.target.value })}
-              placeholder="mis. RSUD Prof. Dr. W.Z. Johannes Kupang"
-              className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <div className="mb-1 grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Tanggal Mulai</label>
-                <input
-                  type="date"
-                  value={form.tanggal_mulai}
-                  onChange={(e) => handleTanggalChange('tanggal_mulai', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                <FieldLabel>Lokasi</FieldLabel>
+                <TextInput
+                  value={form.lokasi}
+                  onChange={(e) => setForm({ ...form, lokasi: e.target.value })}
+                  placeholder="mis. RSUD Prof. Dr. W.Z. Johannes Kupang"
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Tanggal Selesai</label>
-                <input
-                  type="date"
-                  value={form.tanggal_selesai}
-                  onChange={(e) => handleTanggalChange('tanggal_selesai', e.target.value)}
-                  className={`w-full rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 ${
-                    tanggalTidakValid
-                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500/20'
-                      : 'border-slate-200 focus:border-navy-700 focus:ring-navy-700/20'
-                  }`}
-                />
+            </FieldSection>
+
+            <FieldSection label="Periode Sewa">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel>Tanggal Mulai</FieldLabel>
+                  <TextInput
+                    type="date"
+                    value={form.tanggal_mulai}
+                    onChange={(e) => handleTanggalChange('tanggal_mulai', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Tanggal Selesai</FieldLabel>
+                  <TextInput
+                    type="date"
+                    invalid={tanggalTidakValid}
+                    value={form.tanggal_selesai}
+                    onChange={(e) => handleTanggalChange('tanggal_selesai', e.target.value)}
+                  />
+                </div>
               </div>
-            </div>
-            {tanggalTidakValid && (
-              <p className="mb-2 text-xs font-medium text-red-600">
-                Tanggal selesai tidak boleh sebelum tanggal mulai.
+              {tanggalTidakValid && (
+                <p className="text-xs font-medium text-red-600">Tanggal selesai tidak boleh sebelum tanggal mulai.</p>
+              )}
+              <p className="text-xs leading-relaxed text-navy-900/40">
+                Jumlah hari terisi otomatis dari tanggal mulai &amp; selesai &mdash; bisa diubah manual kalau perlu.
               </p>
-            )}
-            <p className="mb-3 text-xs text-navy-900/50">
-              Jumlah hari terisi otomatis dari tanggal mulai &amp; selesai — bisa diubah manual kalau perlu.
-            </p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel required>Jumlah Hari</FieldLabel>
+                  <TextInput
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    required
+                    value={form.jumlah_hari}
+                    onChange={(e) => setForm({ ...form, jumlah_hari: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <FieldLabel required>Harga Satuan / Hari</FieldLabel>
+                  <CurrencyInput
+                    required
+                    value={form.harga_satuan}
+                    onValueChange={(v) => setForm({ ...form, harga_satuan: v })}
+                  />
+                </div>
+              </div>
+              {form.jumlah_hari && form.harga_satuan && (
+                <div className="rounded-xl bg-amber-50 px-3.5 py-2.5 text-sm text-navy-900/70">
+                  Jumlah Harga:{' '}
+                  <span className="font-mono font-semibold text-navy-950">
+                    {formatRupiah(Number(form.jumlah_hari) * Number(form.harga_satuan))}
+                  </span>
+                </div>
+              )}
+            </FieldSection>
 
-            <div className="mb-3 grid grid-cols-2 gap-3">
+            <FieldSection label="Pembayaran & Administrasi">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel hint="opsional">Periode / No. Ref.</FieldLabel>
+                  <TextInput
+                    value={form.periode}
+                    onChange={(e) => setForm({ ...form, periode: e.target.value })}
+                    placeholder="mis. Jan - Jul 2026"
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Status Pembayaran</FieldLabel>
+                  <Select
+                    value={form.status_pembayaran}
+                    onChange={(e) => setForm({ ...form, status_pembayaran: e.target.value })}
+                  >
+                    <option>Belum Lunas</option>
+                    <option>Lunas</option>
+                  </Select>
+                </div>
+              </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Jumlah Hari</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  required
-                  value={form.jumlah_hari}
-                  onChange={(e) => setForm({ ...form, jumlah_hari: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                <FieldLabel hint="opsional">Nomor Referensi Rekening</FieldLabel>
+                <TextInput
+                  value={form.nomor_referensi}
+                  onChange={(e) => setForm({ ...form, nomor_referensi: e.target.value })}
+                  placeholder="mis. 001.01.02.001.018/7"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Harga Satuan / Hari (Rp)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  required
-                  value={form.harga_satuan}
-                  onChange={(e) => setForm({ ...form, harga_satuan: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
+                <FieldLabel hint="opsional">Catatan</FieldLabel>
+                <Textarea
+                  value={form.catatan}
+                  onChange={(e) => setForm({ ...form, catatan: e.target.value })}
+                  rows={2}
                 />
               </div>
-            </div>
+            </FieldSection>
+          </ModalBody>
 
-            {form.jumlah_hari && form.harga_satuan && (
-              <p className="mb-3 text-sm text-navy-900/70">
-                Jumlah Harga:{' '}
-                <span className="font-semibold text-navy-950">
-                  {formatRupiah(Number(form.jumlah_hari) * Number(form.harga_satuan))}
-                </span>
-              </p>
-            )}
-
-            <div className="mb-3 grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Periode / No. Referensi</label>
-                <input
-                  value={form.periode}
-                  onChange={(e) => setForm({ ...form, periode: e.target.value })}
-                  placeholder="mis. Jan - Jul 2026"
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Status Pembayaran</label>
-                <select
-                  value={form.status_pembayaran}
-                  onChange={(e) => setForm({ ...form, status_pembayaran: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                >
-                  <option>Belum Lunas</option>
-                  <option>Lunas</option>
-                </select>
-              </div>
-            </div>
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Nomor Referensi Rekening</label>
-            <input
-              value={form.nomor_referensi}
-              onChange={(e) => setForm({ ...form, nomor_referensi: e.target.value })}
-              placeholder="mis. 001.01.02.001.018/7"
-              className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Catatan</label>
-            <textarea
-              value={form.catatan}
-              onChange={(e) => setForm({ ...form, catatan: e.target.value })}
-              rows={2}
-              className="mb-5 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-navy-900/70 hover:bg-slate-100"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={saving || tanggalTidakValid}
-                className="rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800 disabled:opacity-60"
-              >
-                {saving ? 'Menyimpan&hellip;' : 'Simpan'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
+          <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={saving || tanggalTidakValid}>
+              {saving ? 'Menyimpan\u2026' : 'Simpan'}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
 
       <ConfirmDialog
         open={confirmDeleteId !== null}
@@ -490,5 +467,59 @@ export default function Sewa() {
         onConfirm={() => handleDelete(confirmDeleteId)}
       />
     </div>
+  )
+}
+
+function IconPlus(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" {...props}>
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconSearch(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconEdit(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" {...props}>
+      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconTrash(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" {...props}>
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconPrinter(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" {...props}>
+      <path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M6 14h12v7H6z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconClipboard(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" {...props}>
+      <rect x="4" y="4" width="16" height="17" rx="2" />
+      <path d="M9 3.5h6a1 1 0 0 1 1 1V6H8V4.5a1 1 0 0 1 1-1Z" />
+      <path d="M8 11h8M8 15h8M8 19h5" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconAlert(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 h-4 w-4 flex-none" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5M12 16h.01" strokeLinecap="round" />
+    </svg>
   )
 }

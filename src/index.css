@@ -1,5 +1,16 @@
-html, body, #root {
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
   height: 100%;
+}
+
+body {
+  background-image: theme('backgroundImage.canvas-radial');
+  background-attachment: fixed;
 }
 
 ::-webkit-scrollbar {
@@ -14,12 +25,46 @@ html, body, #root {
   border-radius: 999px;
 }
 
+/* Visible keyboard focus, always */
+:focus-visible {
+  outline: 2px solid theme('colors.amber.500');
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@layer utilities {
+  .skeleton {
+    background-image: linear-gradient(
+      90deg,
+      theme('colors.slate.100') 0px,
+      theme('colors.slate.50') 40px,
+      theme('colors.slate.100') 80px
+    );
+    background-size: 800px 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
 /* Print / cetak rincian tagihan */
 @media print {
+  body {
+    background-image: none;
+  }
   body * {
     visibility: hidden;
   }
-  #print-area, #print-area * {
+  #print-area,
+  #print-area * {
     visibility: visible;
   }
   #print-area {

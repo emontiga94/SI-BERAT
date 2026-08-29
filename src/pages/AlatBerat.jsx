@@ -3,6 +3,11 @@ import { supabase } from '../supabaseClient'
 import { formatRupiah } from '../lib/format'
 import { useAuth } from '../lib/AuthContext'
 import ConfirmDialog from '../components/ConfirmDialog'
+import Button from '../components/ui/Button'
+import Badge from '../components/ui/Badge'
+import Modal, { ModalBody, ModalFooter, FieldSection } from '../components/ui/Modal'
+import { FieldLabel, TextInput, Select, CurrencyInput } from '../components/ui/Field'
+import { SkeletonTableRows } from '../components/ui/Skeleton'
 
 const KONDISI_OPTIONS = [
   'Aktif',
@@ -12,12 +17,12 @@ const KONDISI_OPTIONS = [
   'Tidak Ada',
 ]
 
-const KONDISI_STYLES = {
-  Aktif: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Aktif / Lainnya': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'Tidak Aktif / Rusak Ringan': 'bg-amber-50 text-amber-700 border-amber-200',
-  'Tidak Aktif / Rusak Berat': 'bg-red-50 text-red-700 border-red-200',
-  'Tidak Ada': 'bg-slate-100 text-slate-600 border-slate-200',
+const KONDISI_TONE = {
+  Aktif: 'emerald',
+  'Aktif / Lainnya': 'emerald',
+  'Tidak Aktif / Rusak Ringan': 'amber',
+  'Tidak Aktif / Rusak Berat': 'red',
+  'Tidak Ada': 'slate',
 }
 
 const KONDISI_ROW_TINT = {
@@ -140,228 +145,211 @@ export default function AlatBerat() {
     <div>
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-semibold text-navy-950">Data Alat Berat</h1>
-          <p className="mt-1 text-sm text-navy-900/60">
+          <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-amber-700/70">Armada</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-navy-950">Data Alat Berat</h1>
+          <p className="mt-1.5 text-sm text-navy-900/55">
             Daftar armada alat berat beserta tarif sewa harian dan kondisi terkini.
           </p>
         </div>
-        <button
-          onClick={openCreate}
-          className="rounded-lg bg-navy-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-800"
-        >
-          + Tambah Alat
-        </button>
+        <Button onClick={openCreate} icon={<IconPlus />}>
+          Tambah Alat
+        </Button>
       </header>
 
       {errorMsg && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+        <div className="mb-4 flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          <IconAlert />
           {errorMsg}
         </div>
       )}
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari nama alat atau kategori&hellip;"
-          className="w-full max-w-sm rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-        />
-        <select
-          value={kondisiFilter}
-          onChange={(e) => setKondisiFilter(e.target.value)}
-          className="rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-        >
-          <option>Semua</option>
-          {KONDISI_OPTIONS.map((k) => (
-            <option key={k} value={k}>
-              {k}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
-          <thead className="bg-slate-50 text-xs uppercase tracking-wide text-navy-900/50">
-            <tr>
-              <th className="px-4 py-3 font-semibold">Nama Alat</th>
-              <th className="px-4 py-3 font-semibold">Kategori</th>
-              <th className="px-4 py-3 font-semibold">Harga / Hari</th>
-              <th className="px-4 py-3 font-semibold">Kondisi</th>
-              <th className="px-4 py-3 font-semibold text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {loading && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-navy-900/50">
-                  Memuat data&hellip;
-                </td>
-              </tr>
-            )}
-            {!loading && filtered.length === 0 && (
-              <tr>
-                <td colSpan={5} className="px-4 py-6 text-center text-navy-900/50">
-                  Tidak ada data alat yang cocok.
-                </td>
-              </tr>
-            )}
-            {filtered.map((a) => (
-              <tr key={a.id} className={`hover:bg-slate-50/60 ${KONDISI_ROW_TINT[a.kondisi] || ''}`}>
-                <td className="px-4 py-3 font-medium text-navy-950">
-                  {a.kode ? <span className="mr-1 text-navy-900/40">{a.kode}.</span> : null}
-                  {a.nama_alat}
-                  {a.keterangan && <p className="text-xs font-normal text-navy-900/50">{a.keterangan}</p>}
-                </td>
-                <td className="px-4 py-3 text-navy-900/70">{a.kategori || '-'}</td>
-                <td className="px-4 py-3 font-mono text-navy-950">{formatRupiah(a.harga_per_hari)}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`inline-block rounded-full border px-2.5 py-1 text-xs font-medium ${
-                      KONDISI_STYLES[a.kondisi] || 'bg-slate-100 text-slate-600 border-slate-200'
-                    }`}
-                  >
-                    {a.kondisi}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <button
-                    onClick={() => openEdit(a)}
-                    className="mr-3 text-xs font-semibold text-navy-700 hover:underline"
-                  >
-                    Ubah
-                  </button>
-                  {isAdmin && (
-                    <button
-                      onClick={() => setConfirmDeleteId(a.id)}
-                      className="text-xs font-semibold text-red-600 hover:underline"
-                    >
-                      Hapus
-                    </button>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {showForm && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-navy-950/40 px-4">
-          <form
-            onSubmit={handleSubmit}
-            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-          >
-            <h2 className="mb-4 text-base font-semibold text-navy-950">
-              {form.id ? 'Ubah Data Alat' : 'Tambah Alat Baru'}
-            </h2>
-
-            <div className="mb-3 grid grid-cols-3 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Kode</label>
-                <input
-                  value={form.kode || ''}
-                  onChange={(e) => setForm({ ...form, kode: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                  placeholder="opsional"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Urutan Tampil</label>
-                <input
-                  type="number"
-                  step="1"
-                  value={form.urutan}
-                  onChange={(e) => setForm({ ...form, urutan: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                  placeholder="mis. 10"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Kategori</label>
-                <input
-                  list="kategori-options"
-                  value={form.kategori || ''}
-                  onChange={(e) => setForm({ ...form, kategori: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                  placeholder="pilih atau ketik baru"
-                />
-                <datalist id="kategori-options">
-                  {kategoriOptions.map((k) => (
-                    <option key={k} value={k} />
-                  ))}
-                </datalist>
-              </div>
-            </div>
-            <p className="mb-3 -mt-2 text-xs text-navy-900/50">
-              Urutan tampil menentukan posisi alat di daftar (angka kecil tampil lebih dulu). Alat dengan urutan
-              sama akan diurutkan berdasarkan nama.
-            </p>
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Nama Alat</label>
-            <input
-              required
-              value={form.nama_alat}
-              onChange={(e) => setForm({ ...form, nama_alat: e.target.value })}
-              className="mb-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <div className="mb-3 grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Harga / Hari (Rp)</label>
-                <input
-                  type="number"
-                  min="0"
-                  step="1"
-                  required
-                  value={form.harga_per_hari}
-                  onChange={(e) => setForm({ ...form, harga_per_hari: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-semibold text-navy-900/70">Kondisi</label>
-                <select
-                  value={form.kondisi}
-                  onChange={(e) => setForm({ ...form, kondisi: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-                >
-                  {KONDISI_OPTIONS.map((k) => (
-                    <option key={k} value={k}>
-                      {k}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <label className="mb-1 block text-xs font-semibold text-navy-900/70">Keterangan</label>
-            <input
-              value={form.keterangan || ''}
-              onChange={(e) => setForm({ ...form, keterangan: e.target.value })}
-              placeholder="mis. Di Sekretariat"
-              className="mb-5 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setShowForm(false)}
-                className="rounded-lg px-4 py-2 text-sm font-semibold text-navy-900/70 hover:bg-slate-100"
-              >
-                Batal
-              </button>
-              <button
-                type="submit"
-                disabled={saving}
-                className="rounded-lg bg-navy-900 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800 disabled:opacity-60"
-              >
-                {saving ? 'Menyimpan&hellip;' : 'Simpan'}
-              </button>
-            </div>
-          </form>
+        <div className="relative w-full max-w-sm">
+          <IconSearch className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-navy-900/30" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Cari nama alat atau kategori\u2026"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15"
+          />
         </div>
-      )}
+        <div className="w-44">
+          <Select value={kondisiFilter} onChange={(e) => setKondisiFilter(e.target.value)}>
+            <option>Semua</option>
+            {KONDISI_OPTIONS.map((k) => (
+              <option key={k} value={k}>
+                {k}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <span className="ml-auto text-xs font-medium text-navy-900/45">
+          {filtered.length} dari {alat.length} alat
+        </span>
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-slate-50/80 text-2xs uppercase tracking-wide text-navy-900/45">
+              <tr>
+                <th className="px-4 py-3 font-semibold">Nama Alat</th>
+                <th className="px-4 py-3 font-semibold">Kategori</th>
+                <th className="px-4 py-3 font-semibold">Harga / Hari</th>
+                <th className="px-4 py-3 font-semibold">Kondisi</th>
+                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {loading && <SkeletonTableRows rows={5} cols={5} />}
+              {!loading && filtered.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-12 text-center">
+                    <p className="text-sm font-medium text-navy-900/50">Tidak ada data alat yang cocok</p>
+                    <p className="mt-1 text-xs text-navy-900/35">Coba ubah kata kunci pencarian atau filter kondisi.</p>
+                  </td>
+                </tr>
+              )}
+              {filtered.map((a) => (
+                <tr key={a.id} className={`transition-colors hover:bg-slate-50/60 ${KONDISI_ROW_TINT[a.kondisi] || ''}`}>
+                  <td className="px-4 py-3.5 font-medium text-navy-950">
+                    {a.kode ? <span className="mr-1 text-navy-900/40">{a.kode}.</span> : null}
+                    {a.nama_alat}
+                    {a.keterangan && <p className="text-xs font-normal text-navy-900/45">{a.keterangan}</p>}
+                  </td>
+                  <td className="px-4 py-3.5 text-navy-900/65">{a.kategori || '-'}</td>
+                  <td className="px-4 py-3.5 font-mono text-navy-950">{formatRupiah(a.harga_per_hari)}</td>
+                  <td className="px-4 py-3.5">
+                    <Badge tone={KONDISI_TONE[a.kondisi] || 'slate'}>{a.kondisi}</Badge>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => openEdit(a)}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-navy-700 transition-colors hover:bg-navy-50"
+                        aria-label="Ubah"
+                        title="Ubah"
+                      >
+                        <IconEdit />
+                      </button>
+                      {isAdmin && (
+                        <button
+                          onClick={() => setConfirmDeleteId(a.id)}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-red-500 transition-colors hover:bg-red-50"
+                          aria-label="Hapus"
+                          title="Hapus"
+                        >
+                          <IconTrash />
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <Modal
+        open={showForm}
+        onClose={() => setShowForm(false)}
+        title={form.id ? 'Ubah Data Alat' : 'Tambah Alat Baru'}
+        description={form.id ? 'Perbarui informasi armada alat berat.' : 'Lengkapi data untuk menambah armada baru.'}
+        icon={<IconTruck />}
+        widthClass="max-w-md"
+      >
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <ModalBody>
+            <FieldSection label="Identitas Alat">
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <FieldLabel hint="opsional">Kode</FieldLabel>
+                  <TextInput value={form.kode || ''} onChange={(e) => setForm({ ...form, kode: e.target.value })} />
+                </div>
+                <div>
+                  <FieldLabel hint="mis. 10">Urutan</FieldLabel>
+                  <TextInput
+                    type="number"
+                    step="1"
+                    value={form.urutan}
+                    onChange={(e) => setForm({ ...form, urutan: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Kategori</FieldLabel>
+                  <TextInput
+                    list="kategori-options"
+                    value={form.kategori || ''}
+                    onChange={(e) => setForm({ ...form, kategori: e.target.value })}
+                    placeholder="pilih/ketik"
+                  />
+                  <datalist id="kategori-options">
+                    {kategoriOptions.map((k) => (
+                      <option key={k} value={k} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+              <p className="text-xs leading-relaxed text-navy-900/40">
+                Urutan tampil menentukan posisi alat di daftar (angka kecil tampil lebih dulu).
+              </p>
+
+              <div>
+                <FieldLabel required>Nama Alat</FieldLabel>
+                <TextInput
+                  required
+                  value={form.nama_alat}
+                  onChange={(e) => setForm({ ...form, nama_alat: e.target.value })}
+                />
+              </div>
+            </FieldSection>
+
+            <FieldSection label="Tarif & Kondisi">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <FieldLabel required>Harga / Hari</FieldLabel>
+                  <CurrencyInput
+                    required
+                    value={form.harga_per_hari}
+                    onValueChange={(v) => setForm({ ...form, harga_per_hari: v })}
+                  />
+                </div>
+                <div>
+                  <FieldLabel>Kondisi</FieldLabel>
+                  <Select value={form.kondisi} onChange={(e) => setForm({ ...form, kondisi: e.target.value })}>
+                    {KONDISI_OPTIONS.map((k) => (
+                      <option key={k} value={k}>
+                        {k}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+              </div>
+            </FieldSection>
+
+            <FieldSection label="Catatan">
+              <div>
+                <FieldLabel hint="opsional">Keterangan</FieldLabel>
+                <TextInput
+                  value={form.keterangan || ''}
+                  onChange={(e) => setForm({ ...form, keterangan: e.target.value })}
+                  placeholder="mis. Di Sekretariat"
+                />
+              </div>
+            </FieldSection>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
+              Batal
+            </Button>
+            <Button type="submit" disabled={saving}>
+              {saving ? 'Menyimpan\u2026' : 'Simpan'}
+            </Button>
+          </ModalFooter>
+        </form>
+      </Modal>
 
       <ConfirmDialog
         open={confirmDeleteId !== null}
@@ -372,5 +360,53 @@ export default function AlatBerat() {
         onConfirm={() => handleDelete(confirmDeleteId)}
       />
     </div>
+  )
+}
+
+function IconPlus(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" {...props}>
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconSearch(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m21 21-4.3-4.3" strokeLinecap="round" />
+    </svg>
+  )
+}
+function IconEdit(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" {...props}>
+      <path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconTrash(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4" {...props}>
+      <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1L5 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+function IconTruck(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5" {...props}>
+      <path d="M2 7h11v9H2z" />
+      <path d="M13 10h4l4 3.2V16h-8z" />
+      <circle cx="6.5" cy="17.5" r="1.6" />
+      <circle cx="17" cy="17.5" r="1.6" />
+    </svg>
+  )
+}
+function IconAlert(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="mt-0.5 h-4 w-4 flex-none" {...props}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 8v5M12 16h.01" strokeLinecap="round" />
+    </svg>
   )
 }

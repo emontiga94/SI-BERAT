@@ -10,34 +10,8 @@
       href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
       rel="stylesheet"
     />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              navy: {
-                950: '#0A1B30',
-                900: '#0F2A4A',
-                800: '#163a63',
-                700: '#1f4c80',
-              },
-              amber: {
-                600: '#B5852E',
-                500: '#C99A3C',
-                400: '#DDB868',
-              },
-            },
-            fontFamily: {
-              sans: ['"IBM Plex Sans"', 'sans-serif'],
-              mono: ['"IBM Plex Mono"', 'monospace'],
-            },
-          },
-        },
-      }
-    </script>
   </head>
-  <body class="bg-[#F4F6F8] text-navy-950 font-sans antialiased">
+  <body class="bg-surface text-navy-950 font-sans antialiased">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
 
@@ -11,60 +11,151 @@ const navItems = [
 export default function Layout({ children }) {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  const [mobileOpen, setMobileOpen] = useState(false)
 
   async function handleSignOut() {
     await signOut()
     navigate('/login')
   }
 
+  const initials = (user?.email || '?')
+    .split('@')[0]
+    .split(/[._-]/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((s) => s[0]?.toUpperCase())
+    .join('')
+
   return (
     <div className="flex min-h-screen">
-      <aside className="no-print flex w-64 flex-shrink-0 flex-col bg-navy-950 text-white">
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-navy-950/50 backdrop-blur-sm lg:hidden"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside
+        className={`no-print fixed inset-y-0 left-0 z-40 flex w-64 flex-shrink-0 flex-col bg-navy-gradient text-white transition-transform duration-200 lg:static lg:translate-x-0 ${
+          mobileOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         <div className="flex items-center gap-3 px-6 py-6">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-amber-500 text-sm font-bold tracking-tight text-amber-400">
-            PUPR
+          <div className="relative flex h-11 w-11 flex-none items-center justify-center">
+            <svg viewBox="0 0 44 44" className="h-11 w-11">
+              <polygon
+                points="22,1.5 40,11.5 40,32.5 22,42.5 4,32.5 4,11.5"
+                fill="#0F2A4A"
+                stroke="url(#emblemGrad)"
+                strokeWidth="1.6"
+              />
+              <defs>
+                <linearGradient id="emblemGrad" x1="0" y1="0" x2="44" y2="44">
+                  <stop offset="0%" stopColor="#DDB868" />
+                  <stop offset="100%" stopColor="#B5852E" />
+                </linearGradient>
+              </defs>
+              <text
+                x="22"
+                y="26"
+                textAnchor="middle"
+                fontSize="11"
+                fontWeight="700"
+                letterSpacing="0.5"
+                fill="#DDB868"
+                fontFamily="'IBM Plex Sans', sans-serif"
+              >
+                PUPR
+              </text>
+            </svg>
           </div>
-          <div className="leading-tight">
-            <p className="text-[13px] font-semibold tracking-wide text-white">SI-BERAT</p>
-            <p className="text-[11px] text-white/50">Alat Berat &middot; NTT</p>
+          <div className="min-w-0 leading-tight">
+            <p className="truncate text-[13px] font-semibold tracking-wide text-white">SI-BERAT</p>
+            <p className="truncate text-[11px] text-white/45">Alat Berat &middot; NTT</p>
           </div>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="ml-auto flex h-8 w-8 flex-none items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white lg:hidden"
+            aria-label="Tutup menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4">
+              <path d="M18 6 6 18M6 6l12 12" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
-        <nav className="mt-2 flex-1 space-y-1 px-3">
+        <p className="mb-2 mt-4 px-6 text-2xs font-bold uppercase tracking-widest text-white/25">Navigasi</p>
+        <nav className="flex-1 space-y-1 px-3">
           {navItems.map(({ to, label, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
               end={end}
+              onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                `group relative flex items-center gap-3 overflow-hidden rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150 ${
                   isActive
-                    ? 'bg-amber-500/15 text-amber-400'
-                    : 'text-white/70 hover:bg-white/5 hover:text-white'
+                    ? 'bg-white/10 text-white shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]'
+                    : 'text-white/60 hover:bg-white/5 hover:text-white'
                 }`
               }
             >
-              <Icon className="h-[18px] w-[18px]" />
-              {label}
+              {({ isActive }) => (
+                <>
+                  <span
+                    className={`absolute inset-y-1.5 left-0 w-[3px] rounded-full bg-amber-gradient transition-opacity ${
+                      isActive ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  />
+                  <Icon className={`h-[18px] w-[18px] flex-none ${isActive ? 'text-amber-400' : ''}`} />
+                  {label}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
 
         <div className="border-t border-white/10 px-4 py-4">
-          <p className="truncate text-xs text-white/40">Masuk sebagai</p>
-          <p className="mb-3 truncate text-sm font-medium text-white/90">{user?.email}</p>
+          <div className="mb-3 flex items-center gap-2.5 rounded-xl bg-white/5 px-3 py-2.5">
+            <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-amber-gradient text-xs font-bold text-navy-950">
+              {initials || 'U'}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-white/90">{user?.email}</p>
+              <p className="text-2xs text-white/40">Masuk</p>
+            </div>
+          </div>
           <button
             onClick={handleSignOut}
-            className="w-full rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:bg-white/5 hover:text-white"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/15 px-3 py-2 text-xs font-semibold text-white/80 transition-colors hover:border-white/25 hover:bg-white/5 hover:text-white"
           >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-3.5 w-3.5">
+              <path d="M15 3h3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             Keluar
           </button>
         </div>
       </aside>
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-6 py-8 md:px-10">{children}</div>
-      </main>
+      <div className="flex min-h-screen flex-1 flex-col lg:pl-0">
+        <header className="no-print sticky top-0 z-20 flex items-center gap-3 border-b border-slate-200/70 bg-white/80 px-4 py-3 backdrop-blur lg:hidden">
+          <button
+            onClick={() => setMobileOpen(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-lg text-navy-900 hover:bg-slate-100"
+            aria-label="Buka menu"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+            </svg>
+          </button>
+          <p className="text-sm font-semibold text-navy-950">SI-BERAT</p>
+        </header>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-6xl px-5 py-8 sm:px-8 md:px-10">{children}</div>
+        </main>
+      </div>
     </div>
   )
 }

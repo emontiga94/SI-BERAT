@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from '../lib/AuthContext'
+import Button from '../components/ui/Button'
+import { FieldLabel, TextInput } from '../components/ui/Field'
 
 export default function Login() {
   const { signIn, user, loading } = useAuth()
@@ -26,48 +28,87 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-navy-950 px-4">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-navy-gradient px-4">
+      <div
+        className="pointer-events-none absolute inset-0 opacity-40"
+        style={{
+          backgroundImage:
+            'radial-gradient(600px 300px at 15% 10%, rgba(221,184,104,0.16), transparent 60%), radial-gradient(500px 260px at 90% 90%, rgba(31,76,128,0.35), transparent 60%)',
+        }}
+      />
+
+      <div className="relative w-full max-w-sm animate-fade-in">
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full border-2 border-amber-500 text-sm font-bold text-amber-400">
-            PUPR
-          </div>
+          <svg viewBox="0 0 44 44" className="mb-4 h-14 w-14 drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]">
+            <polygon
+              points="22,1.5 40,11.5 40,32.5 22,42.5 4,32.5 4,11.5"
+              fill="#0A1B30"
+              stroke="url(#loginEmblemGrad)"
+              strokeWidth="1.6"
+            />
+            <defs>
+              <linearGradient id="loginEmblemGrad" x1="0" y1="0" x2="44" y2="44">
+                <stop offset="0%" stopColor="#DDB868" />
+                <stop offset="100%" stopColor="#B5852E" />
+              </linearGradient>
+            </defs>
+            <text
+              x="22"
+              y="26"
+              textAnchor="middle"
+              fontSize="11"
+              fontWeight="700"
+              letterSpacing="0.5"
+              fill="#DDB868"
+              fontFamily="'IBM Plex Sans', sans-serif"
+            >
+              PUPR
+            </text>
+          </svg>
           <h1 className="text-lg font-semibold text-white">SI-BERAT</h1>
           <p className="mt-1 text-sm text-white/50">Dinas PUPR &amp; Penataan Ruang Provinsi NTT</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="rounded-2xl bg-white p-6 shadow-xl">
-          <label className="mb-1 block text-xs font-semibold text-navy-900/70">Email</label>
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@pupr-ntt.go.id"
-            className="mb-4 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-          />
+        <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-white p-6 shadow-elevated sm:p-7">
+          <div className="mb-4">
+            <FieldLabel required>Email</FieldLabel>
+            <TextInput
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="nama@pupr-ntt.go.id"
+              autoComplete="email"
+            />
+          </div>
 
-          <label className="mb-1 block text-xs font-semibold text-navy-900/70">Kata Sandi</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-            className="mb-2 w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-navy-700 focus:ring-2 focus:ring-navy-700/20"
-          />
+          <div className="mb-2">
+            <FieldLabel required>Kata Sandi</FieldLabel>
+            <TextInput
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;"
+              autoComplete="current-password"
+            />
+          </div>
 
-          {error && <p className="mb-2 text-sm font-medium text-red-600">{error}</p>}
+          {error && (
+            <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-red-600">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3.5 w-3.5 flex-none">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 8v5M12 16h.01" strokeLinecap="round" />
+              </svg>
+              {error}
+            </p>
+          )}
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="mt-4 w-full rounded-lg bg-navy-900 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-navy-800 disabled:opacity-60"
-          >
-            {submitting ? 'Memproses&hellip;' : 'Masuk'}
-          </button>
+          <Button type="submit" variant="amber" disabled={submitting} className="mt-5 w-full">
+            {submitting ? 'Memproses\u2026' : 'Masuk'}
+          </Button>
 
-          <p className="mt-4 text-center text-xs text-navy-900/50">
+          <p className="mt-4 text-center text-xs text-navy-900/45">
             Akun dibuat oleh administrator melalui Supabase Auth.
           </p>
         </form>
