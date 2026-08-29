@@ -43,6 +43,7 @@ export default function Dashboard() {
   const stats = useMemo(() => {
     const totalPendapatan = sewa.reduce((sum, s) => sum + Number(s.jumlah_harga || 0), 0)
     const belumLunas = sewa.filter((s) => s.status_pembayaran === 'Belum Lunas')
+    const belumDitagih = belumLunas.filter((s) => !s.sudah_ditagih)
     const alatAktif = alat.filter((a) => a.kondisi?.startsWith('Aktif')).length
     const penyewaUnik = new Set(sewa.map((s) => s.nama_penyewa)).size
     return {
@@ -50,6 +51,8 @@ export default function Dashboard() {
       totalTransaksi: sewa.length,
       belumLunasCount: belumLunas.length,
       belumLunasTotal: belumLunas.reduce((sum, s) => sum + Number(s.jumlah_harga || 0), 0),
+      belumDitagihCount: belumDitagih.length,
+      belumDitagihTotal: belumDitagih.reduce((sum, s) => sum + Number(s.jumlah_harga || 0), 0),
       alatAktif,
       totalAlat: alat.length,
       penyewaUnik,
@@ -188,6 +191,11 @@ export default function Dashboard() {
           <p className="text-sm font-semibold text-amber-800">
             {stats.belumLunasCount} tagihan belum lunas senilai {formatRupiah(stats.belumLunasTotal)}
           </p>
+          {stats.belumDitagihCount > 0 && (
+            <p className="mt-1 text-xs font-medium text-red-700">
+              {stats.belumDitagihCount} di antaranya belum ditagih sama sekali ({formatRupiah(stats.belumDitagihTotal)})
+            </p>
+          )}
           <Link to="/sewa" className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-amber-700 hover:underline">
             Lihat daftar sewa
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3">

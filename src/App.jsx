@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import AlatBerat from './pages/AlatBerat'
 import Sewa from './pages/Sewa'
 import CetakRincian from './pages/CetakRincian'
+import CetakRekap from './pages/CetakRekap'
 
 export default function App() {
   return (
@@ -19,6 +20,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <CetakRincian />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/sewa/cetak-rekap"
+          element={
+            <ProtectedRoute>
+              <CetakRekap />
             </ProtectedRoute>
           }
         />
