@@ -83,20 +83,20 @@ export default function Login() {
           alt="Sigap Membangun Negeri"
           className="mt-5 h-10 w-auto opacity-90 drop-shadow-[0_4px_10px_rgba(0,0,0,0.5)] sm:h-12"
         />
-        <p className="relative z-30 mt-6 text-2xs text-white/40">
+        <p className="mt-6 text-2xs text-white/40">
           Dinas PUPR Provinsi NTT &middot; SI-BERAT v1.0
-          {' '}&middot;{' '}
-          <Link
-            to="/info-sewa"
-            className="relative z-30 inline-block cursor-pointer px-1 py-2 -mx-1 underline decoration-white/30 underline-offset-2 hover:text-white/70"
-          >
-            Info Sewa Alat Berat
-          </Link>
         </p>
       </div>
 
       {/* Kartu login — mengambang di kanan */}
-      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-10 lg:justify-end lg:pr-16 lg:py-0">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-10 lg:justify-end lg:items-end lg:pr-16 lg:py-0">
+        <Link
+          to="/info-sewa"
+          className="flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-navy-950 shadow-glow transition-transform hover:scale-[1.02] hover:bg-amber-300 active:scale-[0.98]"
+        >
+          <InfoIcon className="h-5 w-5 flex-none" />
+          Lihat Info &amp; Sewa Alat Berat
+        </Link>
         <form
           onSubmit={handleSubmit}
           className="w-full max-w-sm animate-fade-in rounded-3xl border border-white/10 bg-white/95 p-6 shadow-elevated backdrop-blur sm:p-7"
@@ -211,6 +211,15 @@ function ArrowIcon({ className = '' }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={className}>
       <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+function InfoIcon({ className = '' }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 11v5.5M12 7.5v.01" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
