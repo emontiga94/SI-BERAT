@@ -146,8 +146,8 @@ export default function AlatBerat() {
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-amber-700/70">Armada</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-navy-950">Data Alat Berat</h1>
-          <p className="mt-1.5 text-sm text-navy-900/55">
+          <h1 className="text-[26px] font-semibold tracking-tight text-navy-950">Data Alat Berat</h1>
+          <p className="mt-1.5 text-sm text-navy-900/50">
             Daftar armada alat berat beserta tarif sewa harian dan kondisi terkini.
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function AlatBerat() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari nama alat atau kategori\u2026"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
           />
         </div>
         <div className="w-44">
@@ -183,47 +183,67 @@ export default function AlatBerat() {
             ))}
           </Select>
         </div>
-        <span className="ml-auto text-xs font-medium text-navy-900/45">
+        <span className="ml-auto text-xs font-medium text-navy-900/40">
           {filtered.length} dari {alat.length} alat
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50/80 text-2xs uppercase tracking-wide text-navy-900/45">
+            <thead className="border-b border-slate-100 bg-slate-50/60 text-2xs uppercase tracking-wide text-navy-900/40">
               <tr>
-                <th className="px-4 py-3 font-semibold">Nama Alat</th>
-                <th className="px-4 py-3 font-semibold">Kategori</th>
-                <th className="px-4 py-3 font-semibold">Harga / Hari</th>
-                <th className="px-4 py-3 font-semibold">Kondisi</th>
-                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+                <th className="px-5 py-3.5 font-bold">Nama Alat</th>
+                <th className="px-5 py-3.5 font-bold">Kategori</th>
+                <th className="px-5 py-3.5 font-bold">Harga / Hari</th>
+                <th className="px-5 py-3.5 font-bold">Kondisi</th>
+                <th className="px-5 py-3.5 text-right font-bold">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && <SkeletonTableRows rows={5} cols={5} />}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center">
+                  <td colSpan={5} className="px-4 py-14 text-center">
+                    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <IconSearch className="h-5 w-5" />
+                    </div>
                     <p className="text-sm font-medium text-navy-900/50">Tidak ada data alat yang cocok</p>
                     <p className="mt-1 text-xs text-navy-900/35">Coba ubah kata kunci pencarian atau filter kondisi.</p>
                   </td>
                 </tr>
               )}
               {filtered.map((a) => (
-                <tr key={a.id} className={`transition-colors hover:bg-slate-50/60 ${KONDISI_ROW_TINT[a.kondisi] || ''}`}>
-                  <td className="px-4 py-3.5 font-medium text-navy-950">
-                    {a.kode ? <span className="mr-1 text-navy-900/40">{a.kode}.</span> : null}
-                    {a.nama_alat}
-                    {a.keterangan && <p className="text-xs font-normal text-navy-900/45">{a.keterangan}</p>}
+                <tr key={a.id} className={`group transition-colors hover:bg-teal-50/30 ${KONDISI_ROW_TINT[a.kondisi] || ''}`}>
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-lg bg-navy-900/5 text-navy-700">
+                        <IconTool className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-navy-950">
+                          {a.kode ? <span className="mr-1 font-normal text-navy-900/35">{a.kode}.</span> : null}
+                          {a.nama_alat}
+                        </p>
+                        {a.keterangan && <p className="truncate text-xs font-normal text-navy-900/40">{a.keterangan}</p>}
+                      </div>
+                    </div>
                   </td>
-                  <td className="px-4 py-3.5 text-navy-900/65">{a.kategori || '-'}</td>
-                  <td className="px-4 py-3.5 font-mono text-navy-950">{formatRupiah(a.harga_per_hari)}</td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-5 py-3.5">
+                    {a.kategori ? (
+                      <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-navy-900/60">
+                        {a.kategori}
+                      </span>
+                    ) : (
+                      <span className="text-navy-900/30">&mdash;</span>
+                    )}
+                  </td>
+                  <td className="px-5 py-3.5 font-mono tabular-nums text-navy-950">{formatRupiah(a.harga_per_hari)}</td>
+                  <td className="px-5 py-3.5">
                     <Badge tone={KONDISI_TONE[a.kondisi] || 'slate'}>{a.kondisi}</Badge>
                   </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
                       <button
                         onClick={() => openEdit(a)}
                         className="flex h-8 w-8 items-center justify-center rounded-lg text-navy-700 transition-colors hover:bg-navy-50"
@@ -399,6 +419,13 @@ function IconTruck(props) {
       <path d="M13 10h4l4 3.2V16h-8z" />
       <circle cx="6.5" cy="17.5" r="1.6" />
       <circle cx="17" cy="17.5" r="1.6" />
+    </svg>
+  )
+}
+function IconTool(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" {...props}>
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.65 2.65a1.5 1.5 0 0 1-2.1-2.1L14.7 6.3Z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }

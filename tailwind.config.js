@@ -21,8 +21,16 @@ export default {
           100: '#F6E9D2',
           50: '#FBF3E4',
         },
+        teal: {
+          700: '#0E5C56',
+          600: '#137A70',
+          500: '#189C8E',
+          400: '#3FBBAC',
+          100: '#DCF3EF',
+          50: '#F0FAF8',
+        },
         surface: {
-          DEFAULT: '#F4F6FA',
+          DEFAULT: '#F5F6F9',
           raised: '#FFFFFF',
         },
       },
@@ -40,6 +48,7 @@ export default {
       },
       boxShadow: {
         soft: '0 1px 2px rgba(10, 27, 48, 0.04), 0 8px 24px -12px rgba(10, 27, 48, 0.10)',
+        card: '0 1px 1px rgba(10,27,48,0.03), 0 1px 3px rgba(10,27,48,0.04)',
         elevated: '0 4px 10px rgba(10, 27, 48, 0.06), 0 20px 40px -18px rgba(10, 27, 48, 0.22)',
         glow: '0 0 0 1px rgba(201, 154, 60, 0.15), 0 8px 24px -8px rgba(201, 154, 60, 0.35)',
       },
@@ -47,7 +56,7 @@ export default {
         'navy-gradient': 'linear-gradient(180deg, #0F2A4A 0%, #0A1B30 100%)',
         'amber-gradient': 'linear-gradient(90deg, #DDB868 0%, #C99A3C 55%, #B5852E 100%)',
         'canvas-radial':
-          'radial-gradient(1200px 480px at 12% -10%, rgba(31,76,128,0.08), transparent 60%), radial-gradient(900px 420px at 100% 0%, rgba(201,154,60,0.07), transparent 55%)',
+          'radial-gradient(1200px 480px at 12% -10%, rgba(31,76,128,0.06), transparent 60%), radial-gradient(900px 420px at 100% 0%, rgba(201,154,60,0.05), transparent 55%)',
       },
       keyframes: {
         'overlay-in': { from: { opacity: 0 }, to: { opacity: 1 } },

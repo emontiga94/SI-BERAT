@@ -255,8 +255,8 @@ export default function Sewa() {
       <header className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="mb-1 text-2xs font-bold uppercase tracking-widest text-amber-700/70">Transaksi</p>
-          <h1 className="text-2xl font-semibold tracking-tight text-navy-950">Rekap Sewa Alat Berat</h1>
-          <p className="mt-1.5 text-sm text-navy-900/55">Catatan transaksi sewa dan status pembayaran.</p>
+          <h1 className="text-[26px] font-semibold tracking-tight text-navy-950">Rekap Sewa Alat Berat</h1>
+          <p className="mt-1.5 text-sm text-navy-900/50">Catatan transaksi sewa dan status pembayaran.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="secondary" onClick={handleEksporCsv} icon={<IconDownload />}>
@@ -285,7 +285,7 @@ export default function Sewa() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari penyewa, alat, atau lokasi\u2026"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-amber-500 focus:ring-4 focus:ring-amber-500/15"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-3 text-sm shadow-sm outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10"
           />
         </div>
         <div className="w-44">
@@ -315,57 +315,67 @@ export default function Sewa() {
             Reset periode
           </button>
         )}
-        <span className="ml-auto rounded-full bg-navy-900/5 px-3.5 py-1.5 text-sm text-navy-900/70">
-          Total: <span className="font-mono font-semibold text-navy-950">{formatRupiah(totalFiltered)}</span>
+        <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-teal-50 px-3.5 py-1.5 text-sm text-teal-800">
+          Total: <span className="font-mono font-semibold tabular-nums">{formatRupiah(totalFiltered)}</span>
         </span>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-soft">
+      <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-card">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50/80 text-2xs uppercase tracking-wide text-navy-900/45">
+            <thead className="border-b border-slate-100 bg-slate-50/60 text-2xs uppercase tracking-wide text-navy-900/40">
               <tr>
-                <th className="px-4 py-3 font-semibold">Penyewa</th>
-                <th className="px-4 py-3 font-semibold">Alat</th>
-                <th className="px-4 py-3 font-semibold">Periode Sewa</th>
-                <th className="px-4 py-3 font-semibold">Hari</th>
-                <th className="px-4 py-3 font-semibold">Jumlah Harga</th>
-                <th className="px-4 py-3 font-semibold">Status</th>
-                <th className="px-4 py-3 text-right font-semibold">Aksi</th>
+                <th className="px-5 py-3.5 font-bold">Penyewa</th>
+                <th className="px-5 py-3.5 font-bold">Alat</th>
+                <th className="px-5 py-3.5 font-bold">Periode Sewa</th>
+                <th className="px-5 py-3.5 font-bold">Hari</th>
+                <th className="px-5 py-3.5 font-bold">Jumlah Harga</th>
+                <th className="px-5 py-3.5 font-bold">Status</th>
+                <th className="px-5 py-3.5 text-right font-bold">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {loading && <SkeletonTableRows rows={5} cols={7} />}
               {!loading && filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-12 text-center">
+                  <td colSpan={7} className="px-4 py-14 text-center">
+                    <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                      <IconSearch className="h-5 w-5" />
+                    </div>
                     <p className="text-sm font-medium text-navy-900/50">Tidak ada data sewa yang cocok</p>
                     <p className="mt-1 text-xs text-navy-900/35">Coba ubah kata kunci pencarian atau filter status.</p>
                   </td>
                 </tr>
               )}
               {filtered.map((s) => (
-                <tr key={s.id} className="transition-colors hover:bg-slate-50/60">
-                  <td className="px-4 py-3.5">
-                    <p className="font-medium text-navy-950">{s.nama_penyewa}</p>
-                    <p className="text-xs text-navy-900/45">{s.jenis_penyewa}</p>
+                <tr key={s.id} className="group transition-colors hover:bg-teal-50/30">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-navy-gradient text-xs font-bold text-amber-300">
+                        {initials(s.nama_penyewa)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-navy-950">{s.nama_penyewa}</p>
+                        <p className="text-xs text-navy-900/40">{s.jenis_penyewa}</p>
+                      </div>
+                    </div>
                   </td>
-                  <td className="px-4 py-3.5 text-navy-900/65">{s.nama_alat_snapshot || '-'}</td>
-                  <td className="px-4 py-3.5 text-navy-900/65">
+                  <td className="px-5 py-3.5 text-navy-900/65">{s.nama_alat_snapshot || '-'}</td>
+                  <td className="px-5 py-3.5 text-navy-900/65">
                     {s.tanggal_mulai ? `${formatDate(s.tanggal_mulai)} s.d ${formatDate(s.tanggal_selesai)}` : (s.periode || '-')}
                   </td>
-                  <td className="px-4 py-3.5 font-mono text-navy-950">{s.jumlah_hari}</td>
-                  <td className="px-4 py-3.5 font-mono text-navy-950">{formatRupiah(s.jumlah_harga)}</td>
-                  <td className="px-4 py-3.5">
+                  <td className="px-5 py-3.5 font-mono tabular-nums text-navy-950">{s.jumlah_hari}</td>
+                  <td className="px-5 py-3.5 font-mono tabular-nums font-semibold text-navy-950">{formatRupiah(s.jumlah_harga)}</td>
+                  <td className="px-5 py-3.5">
                     <Badge tone={s.status_pembayaran === 'Lunas' ? 'emerald' : 'amber'}>{s.status_pembayaran}</Badge>
                     {s.status_pembayaran === 'Belum Lunas' && (
-                      <p className={`mt-1 text-2xs font-medium ${s.sudah_ditagih ? 'text-navy-900/40' : 'text-red-600'}`}>
+                      <p className={`mt-1 text-2xs font-medium ${s.sudah_ditagih ? 'text-navy-900/35' : 'text-red-600'}`}>
                         {s.sudah_ditagih ? 'Sudah ditagih' : 'Belum ditagih'}
                       </p>
                     )}
                   </td>
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center justify-end gap-1">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center justify-end gap-1 opacity-70 transition-opacity group-hover:opacity-100">
                       {s.status_pembayaran === 'Belum Lunas' && !s.sudah_ditagih && (
                         <button
                           onClick={() => handleTandaiDitagih(s.id)}
@@ -607,6 +617,13 @@ export default function Sewa() {
       />
     </div>
   )
+}
+
+function initials(name = '') {
+  const parts = name.trim().split(/\s+/).filter(Boolean)
+  if (parts.length === 0) return '?'
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase()
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
 }
 
 function IconDownload(props) {
