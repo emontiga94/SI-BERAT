@@ -89,7 +89,7 @@ export default function Login() {
       </div>
 
       {/* Kartu login — mengambang di kanan */}
-      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-10 lg:justify-end lg:items-end lg:pr-16 lg:py-0">
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center gap-4 px-4 py-10 lg:items-end lg:pr-16">
         <Link
           to="/info-sewa"
           className="flex w-full max-w-sm items-center justify-center gap-2 rounded-2xl bg-amber-400 px-6 py-3.5 text-sm font-bold text-navy-950 shadow-glow transition-transform hover:scale-[1.02] hover:bg-amber-300 active:scale-[0.98]"
