@@ -39,6 +39,11 @@ update alat_berat
 set urutan = (kode::integer) * 10
 where urutan is null and kode ~ '^[0-9]+$';
 
+-- Cegah data dobel kalau skrip seed di bagian bawah tidak sengaja dijalankan
+-- ulang: 'kode' harus unik (baris tanpa kode/null tidak kena aturan ini).
+create unique index if not exists idx_alat_berat_kode on alat_berat (kode)
+  where kode is not null;
+
 -- ----------------------------------------------------------------------------
 -- Tabel: sewa  (transaksi sewa, dari "REKAP SEWA ALAT BERAT")
 -- ----------------------------------------------------------------------------
@@ -150,30 +155,44 @@ insert into alat_berat (kode, urutan, nama_alat, kategori, harga_per_hari, kondi
   ('12', 120, 'Track Loader',                                            'Alat Berat',        2125000,  'Tidak Ada', null),
   ('13', 130, 'Dump Truck',                                              'Alat Berat',        425000,   'Aktif / Lainnya', 'Di Laboratorium'),
   ('14', 140, 'Truck Crane',                                             'Alat Berat',        1700000,  'Tidak Aktif / Rusak Ringan', null),
-  ('15', 150, 'Mini Excavator',                                          'Alat Berat',        1500000,  'Aktif', null);
+  ('15', 150, 'Mini Excavator',                                          'Alat Berat',        1500000,  'Aktif', null)
+on conflict (kode) where kode is not null do update set
+  urutan = excluded.urutan,
+  nama_alat = excluded.nama_alat,
+  kategori = excluded.kategori,
+  harga_per_hari = excluded.harga_per_hari,
+  kondisi = excluded.kondisi,
+  keterangan = excluded.keterangan;
 
 -- ============================================================================
 -- SEED DATA — diambil dari file REKAP_SEWA_ALAT_BERAT_PERIODE_JANUARI_SD_JULI_2026.xlsx
+-- (hanya dijalankan kalau tabel sewa masih kosong, supaya aman kalau skrip ini
+-- tidak sengaja dijalankan ulang setelah ada transaksi sungguhan)
 -- ============================================================================
-insert into sewa
-  (nama_penyewa, jenis_penyewa, nama_alat_snapshot, lokasi, tanggal_mulai, tanggal_selesai,
-   jumlah_hari, harga_satuan, periode, nomor_referensi, status_pembayaran)
-values
-  ('RSUD W.Z Johannes Kupang', 'Instansi', 'Excavator Komathsu PC 210',
-   'RSUD. Prof.Dr.W.Z. Johannes Kupang', '2026-04-29', '2026-05-15',
-   14, 2550000, 'Januari - Juli 2026', '001.01.02.001.018/7', 'Lunas'),
+do $$
+begin
+  if not exists (select 1 from sewa) then
+    insert into sewa
+      (nama_penyewa, jenis_penyewa, nama_alat_snapshot, lokasi, tanggal_mulai, tanggal_selesai,
+       jumlah_hari, harga_satuan, periode, nomor_referensi, status_pembayaran)
+    values
+      ('RSUD W.Z Johannes Kupang', 'Instansi', 'Excavator Komathsu PC 210',
+       'RSUD. Prof.Dr.W.Z. Johannes Kupang', '2026-04-29', '2026-05-15',
+       14, 2550000, 'Januari - Juli 2026', '001.01.02.001.018/7', 'Lunas'),
 
-  ('Muksin', 'Perorangan', 'Excavator Mini Merek Komathsu',
-   'RSUD. Prof.Dr.W.Z. Johannes Kupang', '2026-04-17', '2026-04-29',
-   10, 1500000, 'Januari - Juli 2026', '001.01.02.001.018/7', 'Lunas'),
+      ('Muksin', 'Perorangan', 'Excavator Mini Merek Komathsu',
+       'RSUD. Prof.Dr.W.Z. Johannes Kupang', '2026-04-17', '2026-04-29',
+       10, 1500000, 'Januari - Juli 2026', '001.01.02.001.018/7', 'Lunas'),
 
-  ('Yohanes Baptista Sama Lau Manek', 'Perorangan', 'Excavator Komathsu PC 210 Bucket',
-   null, null, null,
-   4, 3570000, 'Januari - Juli 2026', null, 'Belum Lunas'),
+      ('Yohanes Baptista Sama Lau Manek', 'Perorangan', 'Excavator Komathsu PC 210 Bucket',
+       null, null, null,
+       4, 3570000, 'Januari - Juli 2026', null, 'Belum Lunas'),
 
-  ('Yohanes Baptista Sama Lau Manek', 'Perorangan', 'Excavator Komathsu PC 210 Breaker',
-   null, null, null,
-   4, 2550000, 'Januari - Juli 2026', null, 'Belum Lunas');
+      ('Yohanes Baptista Sama Lau Manek', 'Perorangan', 'Excavator Komathsu PC 210 Breaker',
+       null, null, null,
+       4, 2550000, 'Januari - Juli 2026', null, 'Belum Lunas');
+  end if;
+end $$;
 
 -- ============================================================================
 -- Selesai. Total 4 transaksi seed di atas = Rp 75.180.000
